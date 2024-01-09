@@ -53,3 +53,13 @@ Set up stations with Raspberry Pis where participants can engage in self-guided 
 ## Custom Project Showcase
 
 Set up screens where members can showcase their projects or documentations, possibly with interactive elements powered by Raspberry Pis.
+
+# Software Tooling
+
+## fabMods
+
+fab mods are a community developed set of tools to generate machine code for machines. Currently the UI is lacking and there is not a lot of documentation. This could be incorporated as part of this project, or forked and a new version developed altogether.
+
+# Goals
+
+- Collaborative open-source development. A goal of this project is to attract and collaborate with other Fab Lab network makers who are interested in working and developing such a project.
