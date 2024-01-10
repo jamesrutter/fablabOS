@@ -4,11 +4,10 @@ from googleapiclient.errors import HttpError
 import os
 import sys
 import sqlite3
-import pprint
 from sqlite3 import Error
 
 # Path to database
-DATABASE = 'fablab.db'
+DATABASE = '../db/fablab.db'
 
 # Path to your service account key file
 SERVICE_TOKEN = '/home/james/dev/fablabOS/keys/haystackos-dc31b0bd0f66.json'
@@ -29,9 +28,9 @@ RANGE = 'A1:I100'
 def main():
     sheet = setup_gsheets()
     values = get_gsheet_values(sheet, COMMUNITY_LABS, RANGE)
-    for row in values:
-        for cell in row:
-            print(cell)
+    for row in values[1:]:
+        row.append('workshop')
+        insert_event_row(row)
 
 
 ######################################
@@ -73,13 +72,15 @@ def get_gsheet_values(sheet, spreadsheet_id, range):
         print(f'An error occurred: {error}')
         sys.exit(1)
 
-# def update_workshops():
-#     """Updates the workshops table in the database"""
-#     sheets.values().update(spreadsheetId=SPREADSHEET_ID, range=RANGE,)
 
-# def get_workshops_by_month(month):
-#     """Returns a list of workshops in a given month"""
-#     pass
+def update_workshops():
+    """Updates the workshops table in the database"""
+    pass
+
+
+def get_workshops_by_month(month):
+    """Returns a list of workshops in a given month"""
+    pass
 
 
 def get_cell_value(sheet, row, col):
@@ -102,16 +103,38 @@ def create_connection(db_file):
     return conn
 
 
-def insert_row(table, row):
-    """Inserts a row into a given table"""
+def insert_event_row(row):
+    """Inserts a row into the event table"""
+    print(f"Inserting row: {row} ... ")
     conn = create_connection(DATABASE)
+    c = conn.cursor()
+    query = """INSERT INTO events 
+               (date_start, time_start, time_end, event_name, fee_reg_amount, fee_facilitator_amount, max_participants, min_participants, event_description, event_type) 
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
     try:
-        c = conn.cursor()
-        c.execute(f"""INSERT INTO {table} VALUES {row}""")
+        c.execute(query, row)
         conn.commit()
         conn.close()
+        print('Row inserted successfully.')
     except Error as e:
         print(e)
+        conn.close()
+
+
+def process_row(row):
+    """Processes a row from the Google Sheet"""
+    date = row[0]
+    time_start = row[1]
+    time_end = row[2]
+    event_name = row[3]
+    fee_reg_amount = row[4]
+    fee_facilitator_amount = row[5]
+    max_participants = row[6]
+    min_participants = row[7]
+    event_description = row[8]
+    row = (date, time_start, time_end, event_name, fee_reg_amount,
+           fee_facilitator_amount, max_participants, min_participants, event_description)
+    insert_event_row(row)
 
 
 if __name__ == '__main__':
