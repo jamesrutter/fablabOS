@@ -8,7 +8,7 @@ CREATE TABLE users (
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
     email TEXT NOT NULL UNIQUE,
-    phone TEXT, 
+    phone TEXT UNIQUE, 
     social TEXT,
     website TEXT,
     bio TEXT,
@@ -56,25 +56,25 @@ CREATE TABLE events (
     event_name TEXT NOT NULL,
     event_description TEXT,
     event_type TEXT NOT NULL, -- workshop, class, meeting, drop-in, etc.
-    date_start TEXT NOT NULL,
-    date_end TEXT, 
-    multi_day INTEGER NOT NULL, -- 0 = no, 1 = yes
-    reoccuring INTEGER NOT NULL, -- 0 = no, 1 = yes
+    date_start DATE NOT NULL,
+    date_end DATE, 
+    multi_day BOOLEAN,
+    reoccuring BOOLEAN, 
     reoccuring_freq TEXT, -- daily, weekly, monthly, yearly
     time_start TEXT,
     time_end TEXT,
-    fee_reg INTEGER NOT NULL, -- 0 = no, 1 = yes
-    fee_reg_amount INTEGER,
-    fee_facilitator INTEGER,  -- 0 = no, 1 = yes
-    fee_facilitator_amount INTEGER,
-    max_cap INTEGER, -- 0 = no limit, 1 = limit
+    fee_reg BOOLEAN,
+    fee_reg_amount REAL,
+    fee_facilitator BOOLEAN, 
+    fee_facilitator_amount REAL,
+    max_cap BOOLEAN,
     max_participants INTEGER,
-    min_cap INTEGER, -- 0 = no limit, 1 = limit
+    min_cap BOOLEAN, 
     min_participants INTEGER,
     target_audience TEXT, -- all, kids, adults, seniors, etc.
     tech_level TEXT, -- beginner, intermediate, advanced
     reg_url TEXT,
-    image_url TEXT,
+    image_url TEXT
 ); 
 
 -- Event Facilitators junction table
