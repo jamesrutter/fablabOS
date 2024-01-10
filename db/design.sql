@@ -1,6 +1,7 @@
 -- fablabOS database design
 
 -- TABLES -- 
+PRAGMA foreign_keys = ON;
 -- Users table
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
@@ -56,20 +57,20 @@ CREATE TABLE events (
     event_name TEXT NOT NULL,
     event_description TEXT,
     event_type TEXT NOT NULL, -- workshop, class, meeting, drop-in, etc.
-    date_start DATE NOT NULL,
-    date_end DATE, 
-    multi_day BOOLEAN,
-    reoccuring BOOLEAN, 
+    date_start DATE NOT NULL, -- YYYY-MM-DD
+    date_end DATE, -- YYYY-MM-DD
+    multi_day BOOLEAN CHECK (multi_day IN (0,1)),
+    reoccuring BOOLEAN CHECK (reoccuring IN (0,1)), 
     reoccuring_freq TEXT, -- daily, weekly, monthly, yearly
-    time_start TEXT,
-    time_end TEXT,
-    fee_reg BOOLEAN,
+    time_start TEXT, -- HH:MM AM/PM
+    time_end TEXT, -- HH:MM AM/PM
+    fee_reg BOOLEAN CHECK (fee_reg IN (0,1))
     fee_reg_amount REAL,
-    fee_facilitator BOOLEAN, 
+    fee_facilitator BOOLEAN CHECK (fee_facilitator IN (0,1)), 
     fee_facilitator_amount REAL,
     max_cap BOOLEAN,
     max_participants INTEGER,
-    min_cap BOOLEAN, 
+    min_cap BOOLEAN CHECK (min_cap IN (0,1)), 
     min_participants INTEGER,
     target_audience TEXT, -- all, kids, adults, seniors, etc.
     tech_level TEXT, -- beginner, intermediate, advanced

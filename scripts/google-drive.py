@@ -28,10 +28,6 @@ RANGE = 'A1:I100'
 def main():
     sheet = setup_gsheets()
     values = get_gsheet_values(sheet, COMMUNITY_LABS, RANGE)
-    for row in values[1:]:
-        row.append('workshop')
-        insert_event_row(row)
-
 
 ######################################
 # GOOGLE SHEETS API HELPER FUNCTIONS #
@@ -119,6 +115,12 @@ def insert_event_row(row):
     except Error as e:
         print(e)
         conn.close()
+
+
+def process_and_insert_row(values):
+    for row in values[1:]:  # Skip the first row (header)
+        row.append('workshop')  # Add the event type
+        insert_event_row(row)
 
 
 def process_row(row):
