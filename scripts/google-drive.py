@@ -48,6 +48,7 @@ def main():
         else:
             print('Printing data from sheet...')
             print(f'Rows: {len(values)} rows found.')
+
             return values
     except HttpError as error:
         print(f'An error occurred: {error}')
