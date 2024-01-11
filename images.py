@@ -2,7 +2,7 @@ import utils.google as google
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload, HttpRequest
 import io
-import pprint
+import os
 
 # Path to image folder
 IMAGE_FOLDER = 'assets/images/'
@@ -55,6 +55,13 @@ def download_image(drive, image):
     # Get file ID and name from the file object
     image_id = image['id']
     image_name = image['name']
+    image_path = os.path.join(IMAGE_FOLDER, image_name)
+
+    # Check if the file already exists in the images folder
+    if os.path.isfile(image_path):
+        print(f"{image_name} already exists! Skipping download.")
+        return
+
     print(f"Downloading {image_name}...")
     try:
         # Create an API request for the file to download
