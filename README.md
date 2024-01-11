@@ -6,6 +6,8 @@ This is an ambitious project to build out a integrated set of systems and servic
 
 # Feature List
 
+## A resource management system for makerspaces and Fab Labs. 
+
 ## Access Control System
 
 An RFID or NFC reader system to control access to certain areas or machines. Members could use RFID tags or cards to gain access. While machine access controls is not all that interested, it could be useful in other contexts within a lab and makes for an interesting technical challenge. RFID/NFC-based systems could be utilized within community spaces in other ways.
@@ -63,3 +65,48 @@ fab mods are a community developed set of tools to generate machine code for mac
 # Goals
 
 - Collaborative open-source development. A goal of this project is to attract and collaborate with other Fab Lab network makers who are interested in working and developing such a project.
+
+# Technology Stack 
+- Backend: Python (Flask)
+- Database: SQLite
+- Frontend: 
+
+# API Design 
+## User Endpoints
+- GET /api/users: Retrieve a list of users.
+- POST /api/users: Create a new user.
+- GET /api/users/{userid}: Retrieve a detailed view of a specific user.
+- PUT /api/users/{userid}: Update a specific user's details.
+- DELETE /api/users/{userid}: Remove a user.
+## Equipment Endpoints 
+- GET /api/equipment: List all equipment.
+- POST /api/equipment: Add new equipment.
+- GET /api/equipment/{equipmentid}: Get details for a piece of equipment.
+- PUT /api/equipment/{equipmentid}: Update equipment details.
+- DELETE /api/equipment/{equipmentid}: Remove equipment from the database.
+## Reservation Endpoints 
+- GET /api/reservations: List all reservations.
+- POST /api/reservations: Create a new reservation.
+- GET /api/reservations/{reservationid}: View details of a reservation.
+- PUT /api/reservations/{reservationid}: Modify a reservation.
+- DELETE /api/reservations/{reservationid}: Cancel a reservation.
+
+# UI Design 
+## Views 
+- Login/Registration Page
+- Dashboard
+- Equipment Catalog
+- Equipment Detail Page
+- Reservation System 
+- User Profiles 
+- Admin Panel 
+
+## UI Requirements
+- resonsive design (mobile friendly)
+- high quality user experience 
+- accessibility 
+- high quality user interface and design 
+
+# Features 
+
+
