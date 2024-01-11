@@ -18,17 +18,26 @@ def get_images(drive):
     """Returns a list of image files from the Fab Lab App > Photos folder.\n
     Args:
     - drive: Google Drive Resources service object
+    Returns:
+    - items: list of file objects (list with id and name)
     """
     try:
-        # Call the Drive v3 API
+        # Construct the query for the Drive API
+        query = f"mimeType != 'application/vnd.google-apps.folder' and '{PHOTOS_FOLDER_ID}' in parents"
+        # Call the Drive v3 API with custom query
         results = (
             drive.files()
-            .list(fields="files(id, name)", q="mimeType != 'application/vnd.google-apps.folder'")
+            .list(fields="files(id, name)", q=query)
             .execute()
         )
+        # Get the list of files from the results and return it
+        items = results.get("files", [])
+        if not items:
+            print("No files found.")
+            return
+        return items
     except HttpError as error:
         print(f"An error occurred: {error}")
-        return
 
 
 def download_image(drive, file):
