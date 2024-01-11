@@ -4,6 +4,9 @@ from googleapiclient.http import MediaIoBaseDownload, HttpRequest
 import io
 import pprint
 
+# Path to image folder
+IMAGE_FOLDER = 'assets/images/'
+
 # Path to database
 DATABASE = '../db/fablab.db'
 
@@ -21,6 +24,7 @@ def get_images(drive):
     Returns:
     - items: list of file objects (list with id and name)
     """
+    print("Getting images from Google Drive...")
     try:
         # Construct the query for the Drive API
         query = f"mimeType != 'application/vnd.google-apps.folder' and '{PHOTOS_FOLDER_ID}' in parents"
@@ -35,24 +39,26 @@ def get_images(drive):
         if not items:
             print("No files found.")
             return
+        print(f'Found {len(items)} files.')
+        print(type(items))
         return items
     except HttpError as error:
         print(f"An error occurred: {error}")
 
 
-def download_image(drive, file):
+def download_image(drive, image):
     """Downloads an image file from Google Drive and saves it to the images folder.\n
     Args:
     - drive: Google Drive Resources service object
-    - file: file object (list with id and name)
+    - image: file object (list with id and name)
     """
     # Get file ID and name from the file object
-    file_id = file['id']
-    file_name = file['name']
-
+    image_id = image['id']
+    image_name = image['name']
+    print(f"Downloading {image_name}...")
     try:
         # Create an API request for the file to download
-        request: HttpRequest = drive.files().get_media(fileId=file_id)
+        request: HttpRequest = drive.files().get_media(fileId=image_id)
         # Create a BytesIO object for the file to download into (memory buffer)
         buffer = io.BytesIO()
         # Create a downloader object for the file to download
@@ -61,50 +67,24 @@ def download_image(drive, file):
         # Download the file
         while done is False:
             status, done = downloader.next_chunk()
-            print(f"Download {int(status.progress() * 100)} %")
+            print(f"Downloaded {int(status.progress() * 100)} %")
 
     except HttpError as error:
         print(f"An error occurred: {error}")
-        file = None
+        image = None
 
     # Save the file to the images folder
-    file_path = f"images/{file_name}"
+    file_path = f"{IMAGE_FOLDER}{image_name}"
     with open(file_path, 'wb') as f:
-        f.write(file)
+        f.write(buffer.getvalue())
+    print(f"File saved to {file_path}")
 
 
 def main():
     drive = google.setup_gdrive()
-
-    try:
-        # Call the Drive v3 API
-        query = f"mimeType != 'application/vnd.google-apps.folder' and '{PHOTOS_FOLDER_ID}' in parents"
-        results = (
-            drive.files()
-            .list(fields="files(id, name)", q=query)
-            .execute()
-        )
-        print("------------------------")
-        print("Print results...")
-        pprint.pprint(results)
-        print("------------------------")
-        print(type(results))
-        items = results.get("files", [])
-        print("Print items...")
-        pprint.pprint(items)
-        print(type(items))
-        if not items:
-            print("No files found.")
-            return
-        print("------------------------")
-        print("Print list of files...")
-        for item in items:
-            print(f"{item['name']} ({item['id']})")
-        print("------------------------")
-        print(f'Number of files: {len(items)}')
-        print("------------------------")
-    except HttpError as error:
-        print(f"An error occurred: {error}")
+    images = get_images(drive)
+    for image in images:
+        download_image(drive, image)
 
 
 if __name__ == '__main__':
