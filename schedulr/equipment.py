@@ -1,12 +1,12 @@
 # Description: This file contains the equipment blueprint for the Schedulr application.
 # Resources: https://nickgeorge.net/programming/python-sqlite3-extract-to-dictionary/
 
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify, Response
 
 from schedulr.auth import login_required
 from schedulr.db import get_db
 
-from sqlite3 import Row, Connection, IntegrityError, Error
+from sqlite3 import Row, Connection, IntegrityError, Error, Cursor
 
 bp = Blueprint(name='equipment', import_name=__name__, url_prefix='/equipment')
 
@@ -39,7 +39,17 @@ def create_equipment():
 
 
 @bp.route(rule='/<int:id>', methods=(['GET']))
-def get_equipment(id):
+def get_equipment(id: int):
+    """This function returns a JSON response containing the equipment with the specified id, otherwise a 404 error.
+    Since the sqlite Row object is not JSON serializable, it is converted to a dictionary before being returned.
+    Flask takes care of serializing the dictionary to JSON automatically if a serializable object is returned.
+
+    Args:
+        id (int): equipment_id to be returned.
+
+    Returns:
+        Response: A JSON response containing the equipment with the specified id, otherwise a 404 error.
+    """
     db = get_db()
     equipment: Row = db.execute(
         'SELECT * FROM equipment WHERE id = ?', (id,)).fetchone()
@@ -51,13 +61,15 @@ def get_equipment(id):
 
 @bp.route(rule='/<int:id>', methods=(['DELETE']))
 def delete_equipment(id):
-    try:
-        db = get_db()
-        db.execute('DELETE FROM equipment WHERE id = ?', (id,))
-        db.commit()
-        return {'message': f'Equipment with id {id} successfully deleted.'}, 200
-    except Error:
+    db = get_db()
+    cursor: Cursor = db.execute('DELETE FROM equipment WHERE id = ?', (id,))
+    db.commit()
+    # rowcount returns the number of rows that were modified by the DELETE statement.
+    num_rows_deleted = cursor.rowcount
+    # If no rows were deleted, the equipment with the specified id does not exist.
+    if num_rows_deleted == 0:
         return {'error': f'Equipment with id {id} does not exist.'}, 404
+    return {'message': f'Equipment with id {id} successfully deleted.'}, 200
 
 
 @bp.route(rule='/<int:id>', methods=(['PUT']))
@@ -68,11 +80,23 @@ def update_equipment(id):
 
     if not name or not description:
         return {'error': 'A name and description are required.'}
-    try:
-        db = get_db()
-        db.execute(
-            'UPDATE equipment SET name = ?, description = ? WHERE id = ?', (name, description, id))
-        db.commit()
-        return {'message': f'Equipment {id} successfully updated.'}
-    except Error:
+
+    db = get_db()
+    cursor: Cursor = db.execute(
+        'UPDATE equipment SET name = ?, description = ? WHERE id = ?', (name, description, id))
+    db.commit()
+    # rowcount returns the number of rows that were modified by the UPDATE statement.
+    num_rows_updated = cursor.rowcount
+    # If no rows were updated, the equipment with the specified id does not exist.
+    if num_rows_updated == 0:
         return {'error': f'Equipment with id {id} does not exist.'}, 404
+    return {'message': f'Equipment {id} successfully updated.'}
+
+
+def check_if_equipment_exists(id):
+    db = get_db()
+    equipment = db.execute(
+        'SELECT * FROM equipment WHERE id = ?', (id,)).fetchone()
+    if equipment is None:
+        return False
+    return True
