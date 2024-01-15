@@ -19,7 +19,7 @@ CREATE TABLE `project` (
 CREATE TABLE `equipment`(
     `id` INTEGER PRIMARY KEY AUTOINCREMENT,
     `name` TEXT NOT NULL,
-    `description` TEXT NOT NULL,
+    `description` TEXT NOT NULL
 );
 CREATE TABLE `reservation`(
     `id` INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,3 +36,13 @@ CREATE TABLE `time_slot`(
     `end_time` DATETIME NOT NULL,
     UNIQUE (`start_time`, `end_time`)
 );
+CREATE TRIGGER prevent_double_booking BEFORE
+INSERT ON reservation FOR EACH ROW BEGIN -- Check for any overlapping reservation with the same equipment_id
+SELECT RAISE(
+        FAIL,
+        'This equipment is already booked for the given time slot.'
+    )
+FROM reservation
+WHERE NEW.equipment_id = equipment_id
+    AND (NEW.time_slot_id = time_slot_id);
+END;
