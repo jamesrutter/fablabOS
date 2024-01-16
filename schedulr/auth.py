@@ -1,8 +1,7 @@
 import functools
-from flask import (
-    Blueprint, g, request, session
-)
+from flask import Blueprint, g, request, session, make_response
 from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.exceptions import BadRequestKeyError
 from schedulr.db import get_db
 
 bp = Blueprint(name='auth', import_name=__name__, url_prefix='/auth')
@@ -10,15 +9,18 @@ bp = Blueprint(name='auth', import_name=__name__, url_prefix='/auth')
 
 @bp.route(rule='/register', methods=(['POST']))
 def register():
-    username = request.form['username']
-    password = request.form['password']
-    role = request.form['role']
+    try:
+        username = request.form['username']
+        password = request.form['password']
+        role = request.form['role']
+    except BadRequestKeyError as e:
+        return make_response(
+            {"error": f"{e.description}",
+             "hint": f"Check the following parameter: {e.args[0]}"}, 400)
 
     if not username or not password or not role:
-        return {
-            "message": "Username, password and role are required.",
-            "status": 400
-        }
+        return make_response(
+            {"error": "Username, password, and role are required."}, 400)
 
     db = get_db()
 
@@ -29,14 +31,9 @@ def register():
         )
         db.commit()
     except db.IntegrityError:
-        return {
-            "message": f'User {username} is already registered.',
-            "status": 400
-        }
-    return {
-        "message": f'{username} successfully registered.',
-        "status": 200
-    }
+        return make_response(
+            {"error": "User already registered. Please specify a different username."}, 400)
+    return make_response({"message": "Successfully registered."}, 200)
 
 
 @bp.route(rule='/login', methods=(['POST']))
@@ -49,17 +46,11 @@ def login():
     ).fetchone()
 
     if user is None or not check_password_hash(pwhash=user['password'], password=password):
-        return {
-            "message": "Incorrect username or password.",
-            "status": 401
-        }
+        return make_response({"error": "Invalid username or password."}, 401)
     session.clear()
     if user:
         session['user_id'] = user['id']
-    return {
-        "message": f'{username} successfully logged in.',
-        "status": 200
-    }
+    return make_response({"message": "Successfully logged in."}, 200)
 
 
 @bp.before_app_request
@@ -77,20 +68,15 @@ def load_logged_in_user():
 @bp.route(rule='/logout')
 def logout():
     session.clear()
-    return {
-        "message": "Successfully logged out.",
-        "status": 200
-    }
+    return make_response({"message": "Successfully logged out."}, 200)
 
 
 def login_required(view):
     @functools.wraps(wrapped=view)
     def wrapped_view(**kwargs):
         if g.user is None:
-            return {
-                "message": "You must be logged in to access this page.",
-                "status": 401
-            }
+            return make_response(
+                {"error": "You must be logged in to access this page."}, 401)
 
         return view(**kwargs)
 
