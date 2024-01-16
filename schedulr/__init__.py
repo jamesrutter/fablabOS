@@ -37,4 +37,10 @@ def create_app(test_config=None):
     from . import equipment
     app.register_blueprint(blueprint=equipment.bp)
 
+    from . import reservations
+    app.register_blueprint(blueprint=reservations.bp)
+
+    from . import users
+    app.register_blueprint(blueprint=users.bp)
+
     return app
