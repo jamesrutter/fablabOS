@@ -1,6 +1,7 @@
 import sqlite3
 import click
-from flask import current_app, g, Flask
+from flask import current_app, g, Flask, jsonify, Response
+from sqlite3 import DatabaseError, Cursor
 
 
 def get_db():
@@ -29,7 +30,7 @@ def init_db():
         db.executescript(f.read().decode('utf8'))
 
 
-@click.command('init-db')
+@click.command(name='init-db')
 def init_db_command():
     """Clear the existing data and create new tables."""
     # click.command() defines a command line command called init-db that calls the init_db function and shows a success message to the user. You can read Command Line Interface to learn more about writing commands.
@@ -41,4 +42,91 @@ def init_app(app: Flask):
     # app.teardown_appcontext() tells Flask to call that function when cleaning up after returning the response.
     app.teardown_appcontext(close_db)
     # app.cli.add_command() adds a new command that can be called with the flask command.
-    app.cli.add_command(init_db_command)
+    app.cli.add_command(cmd=init_db_command)
+    app.cli.add_command(cmd=seed_db)
+
+
+def get_all_data_from_table(table_name) -> Response:
+    """
+    Fetches all records from a specified table in the database.
+
+    Args:
+        table_name (str): The name of the table to fetch records from.
+
+    Returns:
+        list: A list of dictionaries where each dictionary represents a record in the table.
+        If an error occurs, returns an error message with a 500 status code.
+    """
+    try:
+        db = get_db()
+        query = f"SELECT * FROM {table_name}"
+        rows = db.execute(query).fetchall()
+        return jsonify([dict(row) for row in rows])
+    except DatabaseError as e:
+        return jsonify({'error': e.args[0]}, 500)
+
+
+@click.command(name='seed-db')
+def seed_db():
+    """
+    Seeds the database with timeslot records.
+    """
+    init_db()  # Initialize the database if it doesn't exist.
+    db = get_db()
+
+    timeslots_queries = [
+        "INSERT INTO time_slot (start_time, end_time) VALUES ('09:00:00', '10:00:00')",
+        "INSERT INTO time_slot (start_time, end_time) VALUES ('10:00:00', '11:00:00')",
+        "INSERT INTO time_slot (start_time, end_time) VALUES ('11:00:00', '12:00:00')",
+        "INSERT INTO time_slot (start_time, end_time) VALUES ('12:00:00', '13:00:00')",
+        "INSERT INTO time_slot (start_time, end_time) VALUES ('13:00:00', '14:00:00')",
+        "INSERT INTO time_slot (start_time, end_time) VALUES ('14:00:00', '15:00:00')",
+        "INSERT INTO time_slot (start_time, end_time) VALUES ('15:00:00', '16:00:00')",
+        "INSERT INTO time_slot (start_time, end_time) VALUES ('16:00:00', '17:00:00')",
+    ]
+
+    user_queries = [
+        "INSERT INTO user (username, password, role) VALUES ('james', 'pass1234', 'admin')",
+        "INSERT INTO user (username, password, role) VALUES ('jenn', 'pass5678', 'user')",
+        "INSERT INTO user (username, password, role) VALUES ('lucia', 'password3', 'user')",
+        "INSERT INTO user (username, password, role) VALUES ('nico', 'password4', 'editor')",
+        "INSERT INTO user (username, password, role) VALUES ('oliver', 'password5', 'guest')",
+    ]
+
+    equipment_queries = [
+        "INSERT INTO equipment (name, description) VALUES ('Laser Cutter A', 'High precision laser cutter suitable for intricate designs.')",
+        "INSERT INTO equipment (name, description) VALUES ('Laser Cutter B', 'High precision laser cutter suitable for intricate designs.')",
+        "INSERT INTO equipment (name, description) VALUES ('3D Printer A', 'Versatile 3D printer for prototyping and small-scale production.')",
+        "INSERT INTO equipment (name, description) VALUES ('3D Printer B', 'Versatile 3D printer for prototyping and small-scale production.')",
+        "INSERT INTO equipment (name, description) VALUES ('CNC Mill A', 'Computer-controlled milling machine for cutting and engraving.')",
+    ]
+
+    for query in timeslots_queries:
+        try:
+            db.execute(query)
+            db.commit()
+            click.echo(message='Seeded database with timeslots.')
+
+        except DatabaseError as e:
+            print(e.args[0])
+            db.rollback()
+
+    for query in user_queries:
+        try:
+            db.execute(query)
+            db.commit()
+            click.echo(message='Seeded database with user data.')
+
+        except DatabaseError as e:
+            print(e.args[0])
+            db.rollback()
+
+    for query in equipment_queries:
+        try:
+            db.execute(query)
+            db.commit()
+            click.echo(message='Seeded database with equipment data.')
+
+        except DatabaseError as e:
+            print(e.args[0])
+            db.rollback()
