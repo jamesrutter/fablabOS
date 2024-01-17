@@ -2,6 +2,7 @@ import sqlite3
 import click
 from flask import current_app, g, Flask, jsonify, Response
 from sqlite3 import DatabaseError, Cursor
+from werkzeug.security import generate_password_hash
 
 
 def get_db():
@@ -85,12 +86,13 @@ def seed_db():
         "INSERT INTO time_slot (start_time, end_time) VALUES ('16:00:00', '17:00:00')",
     ]
 
-    user_queries = [
-        "INSERT INTO user (username, password, role) VALUES ('james', 'pass1234', 'admin')",
-        "INSERT INTO user (username, password, role) VALUES ('jenn', 'pass5678', 'user')",
-        "INSERT INTO user (username, password, role) VALUES ('lucia', 'password3', 'user')",
-        "INSERT INTO user (username, password, role) VALUES ('nico', 'password4', 'editor')",
-        "INSERT INTO user (username, password, role) VALUES ('oliver', 'password5', 'guest')",
+    password_hash = generate_password_hash(
+        password='password')  # default password for all users
+
+    users_queries = [
+        f"INSERT INTO user (username, password, role) VALUES ('james', '{password_hash}', 'admin')",
+        f"INSERT INTO user (username, password, role) VALUES ('jenn', '{password_hash}', 'user')",
+        f"INSERT INTO user (username, password, role) VALUES ('lucia', '{password_hash}', 'user')",
     ]
 
     equipment_queries = [
@@ -99,6 +101,29 @@ def seed_db():
         "INSERT INTO equipment (name, description) VALUES ('3D Printer A', 'Versatile 3D printer for prototyping and small-scale production.')",
         "INSERT INTO equipment (name, description) VALUES ('3D Printer B', 'Versatile 3D printer for prototyping and small-scale production.')",
         "INSERT INTO equipment (name, description) VALUES ('CNC Mill A', 'Computer-controlled milling machine for cutting and engraving.')",
+    ]
+
+    reservations_queries = [
+        # 09:00-10:00, James, Laser Cutter A
+        "INSERT INTO reservation (time_slot_id, user_id, equipment_id) VALUES (1, 1, 1)",
+        # 10:00-11:00, Jenn, Laser Cutter B
+        "INSERT INTO reservation (time_slot_id, user_id, equipment_id) VALUES (2, 2, 2)",
+        # 11:00-12:00, Lucia, 3D Printer A
+        "INSERT INTO reservation (time_slot_id, user_id, equipment_id) VALUES (3, 3, 3)",
+        # 12:00-13:00, James, 3D Printer B
+        "INSERT INTO reservation (time_slot_id, user_id, equipment_id) VALUES (4, 1, 4)",
+        # 13:00-14:00, Jenn, CNC Mill A
+        "INSERT INTO reservation (time_slot_id, user_id, equipment_id) VALUES (5, 2, 5)",
+        # 14:00-15:00, Lucia, Laser Cutter A
+        "INSERT INTO reservation (time_slot_id, user_id, equipment_id) VALUES (6, 3, 1)",
+        # 15:00-16:00, James, Laser Cutter B
+        "INSERT INTO reservation (time_slot_id, user_id, equipment_id) VALUES (7, 1, 2)",
+        # 16:00-17:00, Jenn, 3D Printer A
+        "INSERT INTO reservation (time_slot_id, user_id, equipment_id) VALUES (8, 2, 3)",
+        # 09:00-10:00 next day, Lucia, 3D Printer B
+        "INSERT INTO reservation (time_slot_id, user_id, equipment_id) VALUES (1, 3, 4)",
+        # 10:00-11:00 next day, James, CNC Mill A
+        "INSERT INTO reservation (time_slot_id, user_id, equipment_id) VALUES (2, 1, 5)",
     ]
 
     for query in timeslots_queries:
@@ -111,11 +136,11 @@ def seed_db():
             print(e.args[0])
             db.rollback()
 
-    for query in user_queries:
+    for query in users_queries:
         try:
             db.execute(query)
             db.commit()
-            click.echo(message='Seeded database with user data.')
+            click.echo(message='Seeded database with users.')
 
         except DatabaseError as e:
             print(e.args[0])
@@ -126,6 +151,16 @@ def seed_db():
             db.execute(query)
             db.commit()
             click.echo(message='Seeded database with equipment data.')
+
+        except DatabaseError as e:
+            print(e.args[0])
+            db.rollback()
+
+    for query in reservations_queries:
+        try:
+            db.execute(query)
+            db.commit()
+            click.echo(message='Seeded database with reservations.')
 
         except DatabaseError as e:
             print(e.args[0])
