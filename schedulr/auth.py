@@ -1,4 +1,5 @@
 import functools
+import logging
 from flask import Blueprint, g, request, session, make_response
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.exceptions import BadRequestKeyError
@@ -56,13 +57,20 @@ def login():
 @bp.before_app_request
 def load_logged_in_user():
     user_id = session.get('user_id')
-
     if user_id is None:
         g.user = None
     else:
         g.user = get_db().execute(
             "SELECT * FROM user WHERE id = ?", (user_id,)
         ).fetchone()
+    print(f"PRE REQUEST\nUser Status: {user_id}")
+
+
+@bp.after_app_request
+def log_session_data(response):
+    print(f"POST REQUEST \nUser Status: {session.get('user_id')}")
+    print(f"Modified Session during request?: {session.modified}")
+    return response
 
 
 @bp.route(rule='/logout')
