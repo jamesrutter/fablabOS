@@ -1,6 +1,6 @@
 # Description: This file contains the equipment blueprint for the Schedulr application.
 # Resources: https://nickgeorge.net/programming/python-sqlite3-extract-to-dictionary/
-
+import logging
 from flask import Blueprint, request, abort
 from sqlite3 import Row, Connection, DatabaseError, Cursor
 from schedulr.db import get_db
@@ -36,6 +36,7 @@ def index():
         # Convert the list of SQlite Row objects to a list of dictionaries, which can be serialized to JSON.
         return [dict(row) for row in equipment_rows]
     except DatabaseError as e:
+        logging.exception(msg='Database error occurred.')
         return {'error': e.args[0]}, 500
 
 
