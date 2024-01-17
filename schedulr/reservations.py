@@ -81,20 +81,7 @@ def make_reservation():
     except BadRequestKeyError as e:
         return {'error': f'{e.description}', 'hint': f'Check the following parameter: {e.args[0]}'}, 400
 
-    if not user_id or not equipment_id or not time_slot_id:
-        return {'error': 'A user ID, equipment ID and timeslot ID are required.'}, 400
-
-    if not check_if_resource_exists(resource_name='user', id=int(user_id)):
-        return {'error': 'User not found.'}, 404
-    if not check_if_resource_exists(resource_name='equipment', id=int(equipment_id)):
-        return {'error': 'Equipment not found.'}, 404
-    if not check_if_resource_exists(resource_name='time_slot', id=int(time_slot_id)):
-        return {'error': 'Timeslot not found.'}, 404
-
-    if not check_if_resource_available(resource_name='equipment', id=int(equipment_id), time_slot_id=int(time_slot_id)):
-        return {'error': 'Equipment is not available for this timeslot.'}, 400
-    if not check_if_resource_available(resource_name='user', id=int(user_id), time_slot_id=int(time_slot_id)):
-        return {'error': 'User already has a reservation for this timeslot.'}, 400
+    validate_reservation(user_id, equipment_id, time_slot_id)
 
     try:
         db = get_db()
@@ -301,9 +288,18 @@ def check_if_resource_available(resource_name: str, id: int, time_slot_id: int) 
     return False
 
 
-def validate_form_fields(*fields):
-    missing_fields = [field for field in fields if not request.form.get(field)]
-    if missing_fields:
-        error = False, f"Missing fields: {', '.join(missing_fields)}"
-        return error, 400
-    pass
+def validate_reservation(user_id, equipment_id, time_slot_id):
+    if not user_id or not equipment_id or not time_slot_id:
+        return {'error': 'A user ID, equipment ID and timeslot ID are required.'}, 400
+
+    if not check_if_resource_exists(resource_name='user', id=int(user_id)):
+        return {'error': 'User not found.'}, 404
+    if not check_if_resource_exists(resource_name='equipment', id=int(equipment_id)):
+        return {'error': 'Equipment not found.'}, 404
+    if not check_if_resource_exists(resource_name='time_slot', id=int(time_slot_id)):
+        return {'error': 'Timeslot not found.'}, 404
+
+    if not check_if_resource_available(resource_name='equipment', id=int(equipment_id), time_slot_id=int(time_slot_id)):
+        return {'error': 'Equipment is not available for this timeslot.'}, 400
+    if not check_if_resource_available(resource_name='user', id=int(user_id), time_slot_id=int(time_slot_id)):
+        return {'error': 'User already has a reservation for this timeslot.'}, 400
