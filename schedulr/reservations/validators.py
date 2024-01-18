@@ -1,4 +1,7 @@
 from schedulr.db import get_db
+from sqlite3 import Connection, Row
+import functools
+from flask import g, make_response, abort
 
 #############################################################
 ###################### HELPER FUNCTIONS #####################
@@ -40,6 +43,36 @@ def check_if_resource_available(resource_name: str, id: int, time_slot_id: int) 
     if resource is None:
         return True
     return False
+
+
+def check_availability(user_id: int, equipment_id: int, time_slot_id: int) -> bool:
+    """This utility function checks if a reservation is valid by checlking if
+    the user and equipment are available for a given timeslot. This is function only queries the
+    database once instead of the two separate queries in the validate_reservation function.
+
+    Args:
+        user_id (int): The ID of the user making the reservation.
+        equipment_id (int): The ID of the equipment being reserved.
+        time_slot_id (int): The ID of the timeslot being reserved.
+
+    Returns:
+        bool: True if the user and equipment are both available, False otherwise.
+    """
+
+    # Check if equipment and user is available for a given timeslot
+    query = """
+            SELECT 
+                equipment_id, time_slot_id, user_id
+            FROM 
+                reservation 
+            WHERE
+                (equipment_id = ? AND time_slot_id = ?) OR (user_id = ? AND time_slot_id = ?)"""
+    db = get_db()
+    reservations = db.execute(
+        query, (equipment_id, time_slot_id, user_id)).fetchall()
+    if len(reservations) > 0:
+        return False
+    return True
 
 
 def validate_reservation(user_id: str, equipment_id: str, time_slot_id: str) -> tuple[bool, str]:

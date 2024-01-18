@@ -1,6 +1,8 @@
 import os
 from config import Config
 from flask import Flask
+from .errors import handle_404, handle_500, handle_http_exception
+from werkzeug.exceptions import HTTPException
 
 
 def create_app(test_config=None):
@@ -41,6 +43,14 @@ def create_app(test_config=None):
 
     from schedulr.auth import auth_bp
     app.register_blueprint(blueprint=auth_bp)
+
+    from schedulr.auth.users import users_bp
+    app.register_blueprint(blueprint=users_bp)
+
+    # register the error handlers
+    # app.register_error_handler(HTTPException, handle_http_exception)
+    # app.register_error_handler(404, handle_404)
+    # app.register_error_handler(500, handle_500)
 
     return app
 

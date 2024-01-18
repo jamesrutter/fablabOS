@@ -30,6 +30,17 @@ CREATE TABLE `reservation`(
     FOREIGN KEY (`user_id`) REFERENCES user(id) ON DELETE CASCADE,
     FOREIGN KEY (`equipment_id`) REFERENCES equipment(id) ON DELETE CASCADE
 );
+CREATE TABLE `roles` (
+    `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+    `role` TEXT NOT NULL
+);
+CREATE TABLE `user_roles` (
+    `user_id` INTEGER NOT NULL,
+    `role_id` INTEGER NOT NULL,
+    FOREIGN KEY (`user_id`) REFERENCES user(id) ON DELETE CASCADE,
+    FOREIGN KEY (`role_id`) REFERENCES roles(id) ON DELETE CASCADE,
+    PRIMARY KEY (`user_id`, `role_id`)
+);
 CREATE TABLE `time_slot`(
     `id` INTEGER PRIMARY KEY AUTOINCREMENT,
     `start_time` DATETIME NOT NULL,

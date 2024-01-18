@@ -1,13 +1,11 @@
 from sqlite3 import Row, DatabaseError
 from schedulr.db import get_db
-from . import reservations_bp as rbp
 
 ###############################
 ######## TIME SLOTS ###########
 ###############################
 
 
-@rbp.route(rule='/timeslots', methods=(['GET']))
 def get_timeslots():
     """
     Retrieve a list of all available timeslots.

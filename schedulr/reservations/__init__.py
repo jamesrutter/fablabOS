@@ -4,7 +4,8 @@ from schedulr.db import get_db
 from schedulr.auth import login_required
 from werkzeug.exceptions import BadRequestKeyError
 
-from . import validators as v
+from .validators import validate_reservation
+from schedulr.auth import owner_required
 
 
 def create_reservation_bp():
@@ -82,7 +83,7 @@ def create_reservation_bp():
         except BadRequestKeyError as e:
             return {'status': 'fail', 'hint': f'{e.description} Check the following parameter: {e.args[0]}'}, 400
 
-        (is_valid, message) = v.validate_reservation(
+        (is_valid, message) = validate_reservation(
             user_id=user_id, equipment_id=equipment_id, time_slot_id=time_slot_id)
         if not is_valid:
             return {'status': 'error', 'message': message}, 400
@@ -158,6 +159,7 @@ def create_reservation_bp():
 
     @bp.put(rule='/<int:id>')
     @login_required
+    @owner_required
     def update_reservation(id):
         """
         Update a reservation in the database.
@@ -194,6 +196,7 @@ def create_reservation_bp():
 
     @bp.delete(rule='/<int:id>')
     @login_required
+    @owner_required
     def delete_reservation(id):
         """
         Delete a reservation from the database.
@@ -219,6 +222,10 @@ def create_reservation_bp():
             return {'status': 'error', 'message': e.args[0]}, 500
         finally:
             db.close()
+
+    # Now register the sub-module routes with the blueprint
+    from .timeslots import get_timeslots
+    bp.get('/timeslots')(get_timeslots)
 
     return bp
 

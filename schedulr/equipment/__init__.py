@@ -4,7 +4,7 @@ import logging
 from flask import Blueprint, request, abort
 from sqlite3 import Row, Connection, DatabaseError, Cursor
 from schedulr.db import get_db
-from schedulr.auth import login_required
+from schedulr.auth import login_required, admin_required
 
 
 #########################################
@@ -42,8 +42,9 @@ def create_equipment_bp():
             logging.exception(msg='Database error occurred.')
             return {'error': e.args[0]}, 500
 
-    @bp.route(rule='/', methods=(['POST']))
+    @bp.post(rule='/)')
     @login_required
+    @admin_required
     def create_equipment():
         """
         Create a new equipment item in the database.
@@ -72,7 +73,7 @@ def create_equipment_bp():
         db.commit()
         return {'message': 'Equipment successfully created.'}, 201
 
-    @bp.route(rule='/<int:id>', methods=(['GET']))
+    @bp.get(rule='/<int:id>')
     def get_equipment(id: int):
         """This function returns a JSON response containing the equipment with the specified id, otherwise a 404 error.
         Since the sqlite Row object is not JSON serializable, it is converted to a dictionary before being returned.
@@ -92,8 +93,9 @@ def create_equipment_bp():
         # Return the database row as a dictionary to be serialized to JSON.
         return dict(equipment)
 
-    @bp.route(rule='/<int:id>', methods=(['DELETE']))
+    @bp.delete(rule='/<int:id>')
     @login_required
+    @admin_required
     def delete_equipment(id):
         """
         Delete an equipment item from the database by its ID.
@@ -119,8 +121,9 @@ def create_equipment_bp():
             return {'error': f'Equipment with id {id} does not exist.'}, 404
         return {'message': f'Equipment with id {id} successfully deleted.'}, 200
 
-    @bp.route(rule='/<int:id>', methods=(['PUT']))
+    @bp.put(rule='/<int:id>')
     @login_required
+    @admin_required
     def update_equipment(id):
         """
         Update an existing equipment item in the database by its ID.
