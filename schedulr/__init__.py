@@ -33,17 +33,14 @@ def create_app(test_config=None):
     from . import db
     db.init_app(app=app)
 
-    from . import auth
-    app.register_blueprint(blueprint=auth.bp)
+    from schedulr.reservations import reservations_bp
+    app.register_blueprint(blueprint=reservations_bp)
 
-    from . import equipment
-    app.register_blueprint(blueprint=equipment.bp)
+    from schedulr.equipment import equipment_bp
+    app.register_blueprint(blueprint=equipment_bp)
 
-    from . import reservations
-    app.register_blueprint(blueprint=reservations.bp)
-
-    from . import users
-    app.register_blueprint(blueprint=users.bp)
+    from schedulr.auth import auth_bp
+    app.register_blueprint(blueprint=auth_bp)
 
     return app
 

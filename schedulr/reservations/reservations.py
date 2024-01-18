@@ -52,9 +52,9 @@ def index():
         reservation_rows: list[Row] = db.execute(query).fetchall()
 
         # Convert the list of SQlite Row objects to a list of dictionaries, which can be serialized to JSON.
-        return [dict(row) for row in reservation_rows]
+        return {'status': 'success', 'data': [dict(row) for row in reservation_rows]}, 200
     except DatabaseError as e:
-        return {'error': e.args[0]}, 500
+        return {'status': 'error', 'message': e.args[0]}, 500
 
 
 @bp.post(rule='/')
@@ -79,13 +79,14 @@ def make_reservation():
         equipment_id = request.form['equipment_id']
         time_slot_id = request.form['time_slot_id']
     except BadRequestKeyError as e:
-        return {'error': f'{e.description}', 'hint': f'Check the following parameter: {e.args[0]}'}, 400
+        return {'status': 'fail', 'hint': f'{e.description} Check the following parameter: {e.args[0]}'}, 400
 
-    validate_reservation(user_id, equipment_id, time_slot_id)
-
+    (is_valid, message) = validate_reservation(
+        user_id=user_id, equipment_id=equipment_id, time_slot_id=time_slot_id)
+    if not is_valid:
+        return {'status': 'error', 'message': message}, 400
+    db = get_db()
     try:
-        db = get_db()
-
         # Insert the reservation into the database.
         query = """INSERT INTO reservation (user_id, equipment_id, time_slot_id) VALUES (?, ?, ?)"""
         db.execute(query, (user_id, equipment_id, time_slot_id))
@@ -98,9 +99,10 @@ def make_reservation():
 
         # Convert the SQlite Row object to a dictionary, which can be serialized to JSON.
         reservation_data = dict(reservation_row)
-        return {'message': 'Reservation successfully created.', 'reservation': reservation_data}, 201
+        return {'status': 'Success', 'data': reservation_data}, 201
     except DatabaseError as e:
-        return {'error': e.args[0]}, 500
+        db.rollback
+        return {'status': e.args[0]}, 500
 
 
 @bp.get(rule='/<int:id>')
@@ -118,9 +120,8 @@ def get_reservation(id):
         Response: A JSON object representing the reservation that was retrieved. 
         If the reservation could not be retrieved, an error message with a 500 status code is returned.
     """
+    db = get_db()
     try:
-        db = get_db()
-
         # Select the reservation from the database, returns as a SQlite Row object.
         query = """
         SELECT 
@@ -142,16 +143,18 @@ def get_reservation(id):
         WHERE
             reservation.id = ?;
         """
-        reservation_row: Cursor = db.execute(query, (id,)).fetchone()
+        reservation: Row = db.execute(query, (id,)).fetchone()
 
-        if reservation_row is None:
-            return {'error': 'Reservation not found.'}, 404
+        if reservation is None:
+            return {'status': 'error', 'message': 'Reservation not found.'}, 404
 
         # Convert the SQlite Row object to a dictionary, which can be serialized to JSON.
-        reservation_data = dict(reservation_row)
-        return reservation_data, 200
+        data = dict(reservation)
+        return {'status': 'success', 'data': data}, 200
     except DatabaseError as e:
-        return {'error': e.args[0]}, 500
+        return {'status': 'error', 'message': e.args[0]}, 500
+    finally:
+        db.close()
 
 
 @bp.put(rule='/<int:id>')
@@ -168,9 +171,8 @@ def update_reservation(id):
         Response: A JSON object representing the reservation that was updated. 
         If the reservation could not be updated, an error message with a 500 status code is returned.
     """
+    db = get_db()
     try:
-        db = get_db()
-
         # Update the reservation in the database.
         query = """UPDATE reservation SET user_id = ?, equipment_id = ?, time_slot_id = ? WHERE id = ?"""
         db.execute(query, (request.form['user_id'], request.form['equipment_id'],
@@ -179,13 +181,16 @@ def update_reservation(id):
 
         # Select the reservation from the database, returns as a SQlite Row object.
         query = """SELECT * FROM reservation WHERE id = ?"""
-        reservation_row: Cursor = db.execute(query, (id,)).fetchone()
+        reservation: Row = db.execute(query, (id,)).fetchone()
 
         # Convert the SQlite Row object to a dictionary, which can be serialized to JSON.
-        reservation_data = dict(reservation_row)
-        return {'message': 'Reservation successfully updated.', 'reservation': reservation_data}, 200
+        data = dict(reservation)
+        return {'status': 'success', 'data': data}, 200
     except DatabaseError as e:
-        return {'error': e.args[0]}, 500
+        db.rollback()
+        return {'status': 'error', 'message': e.args[0]}, 500
+    finally:
+        db.close()
 
 
 @bp.delete(rule='/<int:id>')
@@ -202,17 +207,18 @@ def delete_reservation(id):
         Response: A success message if the reservation is deleted successfully, 
         or an error message with a 500 status code if the reservation could not be deleted.
     """
+    db = get_db()
     try:
-        db = get_db()
-
         # Delete the reservation from the database.
         query = """DELETE FROM reservation WHERE id = ?"""
         db.execute(query, (id,))
         db.commit()
-
-        return {'message': 'Reservation successfully deleted.'}
+        return {'status': 'success', 'data': None}, 200
     except DatabaseError as e:
-        return {'error': e.args[0]}, 500
+        db.rollback()
+        return {'status': 'error', 'message': e.args[0]}, 500
+    finally:
+        db.close()
 
 
 ###############################
@@ -288,18 +294,29 @@ def check_if_resource_available(resource_name: str, id: int, time_slot_id: int) 
     return False
 
 
-def validate_reservation(user_id, equipment_id, time_slot_id):
+def validate_reservation(user_id: str, equipment_id: str, time_slot_id: str) -> tuple[bool, str]:
+    """This utility function validates a reservation request.
+
+    Args:
+        user_id (int): The ID of the user making the reservation.
+        equipment_id (int): The ID of the equipment being reserved.
+        time_slot_id (int): The ID of the timeslot being reserved.
+
+    Returns:
+        tuple[bool, str]: A tuple containing a boolean indicating whether the reservation is valid,
+        and a string containing a message indicating why the reservation is invalid."""
     if not user_id or not equipment_id or not time_slot_id:
-        return {'error': 'A user ID, equipment ID and timeslot ID are required.'}, 400
+        return (False, 'User ID, equipment ID, and timeslot ID are required.')
 
     if not check_if_resource_exists(resource_name='user', id=int(user_id)):
-        return {'error': 'User not found.'}, 404
+        return (False, 'User not found.')
     if not check_if_resource_exists(resource_name='equipment', id=int(equipment_id)):
-        return {'error': 'Equipment not found.'}, 404
+        return (False, 'Equipment not found.')
     if not check_if_resource_exists(resource_name='time_slot', id=int(time_slot_id)):
-        return {'error': 'Timeslot not found.'}, 404
+        return (False, 'Timeslot not found.')
 
     if not check_if_resource_available(resource_name='equipment', id=int(equipment_id), time_slot_id=int(time_slot_id)):
-        return {'error': 'Equipment is not available for this timeslot.'}, 400
+        return (False, 'Equipment already reserved for this timeslot.')
     if not check_if_resource_available(resource_name='user', id=int(user_id), time_slot_id=int(time_slot_id)):
-        return {'error': 'User already has a reservation for this timeslot.'}, 400
+        return (False, 'User already has a reservation for this timeslot.')
+    return (True, 'Reservation is valid.')
