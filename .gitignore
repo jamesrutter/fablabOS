@@ -21,3 +21,5 @@ build/
 # Flask specfic files 
 .flaskenv
 
+# Bash Shell Environment 
+workshop-mailer/env.sh

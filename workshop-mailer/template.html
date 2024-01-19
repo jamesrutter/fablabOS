@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      .email-container {
+        font-family: Arial, sans-serif;
+        color: #333;
+      }
+      .header {
+        background-color: #f2f2f2;
+        padding: 10px;
+        text-align: center;
+      }
+      .workshop-details {
+        margin: 20px;
+      }
+      .workshop-title {
+        font-size: 18px;
+        font-weight: bold;
+      }
+      .register-button {
+        display: inline-block;
+        padding: 10px 20px;
+        margin: 10px 0;
+        background-color: #4caf50;
+        color: white;
+        text-decoration: none;
+      }
+      .footer {
+        background-color: #f2f2f2;
+        padding: 10px;
+        text-align: center;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email-container">
+      <div class="header">
+        <img src="{{ logo_url }}" alt="Logo" />
+      </div>
+
+      <h1>Greetings!</h1>
+      <p>You are all registered for tomorrow's workshop, {{workshop_title}}. This email is to confirm some information and connect you with your instructor, James Rutter, who has included a memo to share with you ahead of the workshop.</p>
+
+      <div class="workshop-details">
+        <div class="workshop-title">{{ workshop_title }}</div>
+        <div class="workshop-date">{{ workshop_date }}</div>
+        <div class="workshop-time">{{ workshop_time }}</div>
+        <div class="workshop-location">{{ workshop_location }}</div>
+
+        
+
+      <div class="footer">
+        Haystack Community Labs | 22 Church St. | Deer Isle, ME
+      </div>
+    </div>
+  </body>
+</html>
