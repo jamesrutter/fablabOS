@@ -7,6 +7,8 @@ from werkzeug.exceptions import BadRequestKeyError
 from .validators import validate_reservation
 from schedulr.auth import owner_required
 
+from schedulr.mail import confirmation_email
+
 
 def create_reservation_bp():
     bp = Blueprint(name='reservations', import_name=__name__,
@@ -101,6 +103,12 @@ def create_reservation_bp():
 
             # Convert the SQlite Row object to a dictionary, which can be serialized to JSON.
             reservation_data = dict(reservation_row)
+            # Example usage
+            confirmation_email(
+                user_email="jamesdavidrutter@gmail.com",
+                user_name="James",
+                reservation_details="Date: April 5, 2024\nTime: 10:00 AM - 12:00 PM\nEquipment: 3D Printer"
+            )
             return {'status': 'Success', 'data': reservation_data}, 201
         except DatabaseError as e:
             db.rollback
