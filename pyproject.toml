@@ -1,0 +1,7 @@
+[project]
+name = "fablabOS"
+version = "0.x.x"
+description = "fablabOS is a collection of tools to manage a FabLab."
+authors = ["James Rutter <jamesdavidrutter@gmail.com>"]
+
+[project.dependencies]
