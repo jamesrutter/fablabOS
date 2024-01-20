@@ -1,11 +1,11 @@
 from flask import Blueprint, request
 from sqlite3 import Row, DatabaseError, Cursor
 from api.db import get_db
-from api.auth import login_required
+from api.auth.decorators import login_required
 from werkzeug.exceptions import BadRequestKeyError
 
 from .validators import validate_reservation
-from api.auth import owner_required
+from api.auth.decorators import owner_required
 
 from api.mail import confirmation_email
 

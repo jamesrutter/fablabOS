@@ -42,10 +42,8 @@ def create_app(test_config=None):
     from api.equipment import equipment_bp
     app.register_blueprint(blueprint=equipment_bp)
 
-    from api.auth import auth_bp
+    from api.auth import auth_bp, users_bp
     app.register_blueprint(blueprint=auth_bp)
-
-    from api.auth.users import users_bp
     app.register_blueprint(blueprint=users_bp)
 
     # register the error handlers

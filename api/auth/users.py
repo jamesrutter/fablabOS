@@ -1,8 +1,8 @@
-from flask import Blueprint, request, abort
+from flask import Blueprint
 from flask.typing import ResponseReturnValue
 from sqlite3 import Row, Connection, DatabaseError, Cursor
 from api.db import get_db
-from api.auth import login_required
+from api.auth.decorators import login_required
 
 
 def create_users_bp():

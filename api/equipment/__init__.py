@@ -4,7 +4,7 @@ import logging
 from flask import Blueprint, request, abort
 from sqlite3 import Row, Connection, DatabaseError, Cursor
 from api.db import get_db
-from api.auth import login_required, admin_required
+from api.auth.decorators import login_required, admin_required
 
 
 #########################################
