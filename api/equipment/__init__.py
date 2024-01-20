@@ -3,8 +3,8 @@
 import logging
 from flask import Blueprint, request, abort
 from sqlite3 import Row, Connection, DatabaseError, Cursor
-from schedulr.db import get_db
-from schedulr.auth import login_required, admin_required
+from api.db import get_db
+from api.auth import login_required, admin_required
 
 
 #########################################

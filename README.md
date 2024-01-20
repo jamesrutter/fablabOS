@@ -4,6 +4,31 @@
 
 This is an ambitious project to build out a integrated set of systems and services to better improve the user experience at the Haystack Fab Lab. This design could be applied to other contexts, such as community makerspaces, university labs, fab labs, and communal studios. The goal is to utilize a series of open hardware devices, such as the RaspberryPi and Arduino to accomplish as much of the system as possible. This project will be open-source and shared and used as a learning opportunity for students of the Fab Lab.
 
+
+# Project Structure 
+- `/assets` static files utilized for GUI/front-end. Currently has `/images`, `/scripts`, and `/styles` to organize these areas. Images and other media files could be stored on a remote S3 service for better performance (e.g., Supabase). 
+- `/api` is a Flask instance and the primary server engine handling API functions. 
+- `/data` is where the database schema and sqlite db reside. Note: In the current implementation, the Flask instance (API) is generating its own db located in `/instance`, which is not being tracked and being used for development purposes. 
+- 
+
+# API Overview 
+### Setup Database
+Before starting a project, you need to initialize the database. Run the following command: 
+- `flask --app api init-db`
+
+This executes the schema file (schema.db) and builds the tables in sqlite. It does not populate it with any data. 
+
+### Seed Database (optional)
+To populate the database with test data, run the following command: 
+- `flask --app api seed-db`
+
+### Start the server 
+To start running the API server, use one of the following commands from the project directory:
+- `flask run --debug`
+- `flask --app api run` 
+
+
+
 # Feature List
 
 ## A resource management system for makerspaces and Fab Labs. 

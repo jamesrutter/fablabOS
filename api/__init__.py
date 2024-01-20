@@ -1,5 +1,5 @@
 import os
-from config import Config
+from api.config import Config
 from flask import Flask
 from .errors import handle_404, handle_500, handle_http_exception
 from werkzeug.exceptions import HTTPException
@@ -30,21 +30,22 @@ def create_app(test_config=None):
 
     @app.route(rule='/')
     def index():
-        return 'fablabOS API 1.0.0'
+        app.logger.info(msg='API Index Route')
+        return {'status': 'success', 'message': 'fablabOS API 0.x.x. Warning! This API is under active and rapid development.'}, 200
 
     from . import db
     db.init_app(app=app)
 
-    from schedulr.reservations import reservations_bp
+    from api.reservations import reservations_bp
     app.register_blueprint(blueprint=reservations_bp)
 
-    from schedulr.equipment import equipment_bp
+    from api.equipment import equipment_bp
     app.register_blueprint(blueprint=equipment_bp)
 
-    from schedulr.auth import auth_bp
+    from api.auth import auth_bp
     app.register_blueprint(blueprint=auth_bp)
 
-    from schedulr.auth.users import users_bp
+    from api.auth.users import users_bp
     app.register_blueprint(blueprint=users_bp)
 
     # register the error handlers

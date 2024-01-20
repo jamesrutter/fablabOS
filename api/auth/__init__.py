@@ -3,7 +3,7 @@ import logging
 from flask import Blueprint, g, request, session, make_response, abort
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.exceptions import BadRequestKeyError
-from schedulr.db import get_db
+from api.db import get_db
 
 
 def login_required(view):

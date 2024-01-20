@@ -1,5 +1,5 @@
 from sqlite3 import Row, DatabaseError
-from schedulr.db import get_db
+from api.db import get_db
 
 ###############################
 ######## TIME SLOTS ###########

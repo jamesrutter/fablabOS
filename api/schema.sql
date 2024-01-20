@@ -1,8 +1,12 @@
+-- This file contains the schema for the database
+-- Drop tables if they exist
 DROP TABLE IF EXISTS `user`;
 DROP TABLE IF EXISTS `project`;
 DROP TABLE IF EXISTS `equipment`;
 DROP TABLE IF EXISTS `reservation`;
 DROP TABLE IF EXISTS `time_slot`;
+DROP TABLE IF EXISTS `roles`;
+DROP TABLE IF EXISTS `user_roles`;
 CREATE TABLE `user` (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
@@ -47,6 +51,7 @@ CREATE TABLE `time_slot`(
     `end_time` DATETIME NOT NULL,
     UNIQUE (`start_time`, `end_time`)
 );
+-- This trigger prevents double booking of equipment
 -- CREATE TRIGGER prevent_double_booking BEFORE
 -- INSERT ON reservation FOR EACH ROW BEGIN -- Check for any overlapping reservation with the same equipment_id
 -- SELECT RAISE(

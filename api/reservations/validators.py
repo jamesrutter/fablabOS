@@ -1,4 +1,4 @@
-from schedulr.db import get_db
+from api.db import get_db
 from sqlite3 import Connection, Row
 import functools
 from flask import g, make_response, abort

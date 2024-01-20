@@ -1,7 +1,7 @@
 import sqlite3
 import click
-from flask import current_app, g, Flask, jsonify, Response
-from sqlite3 import DatabaseError, Cursor
+from flask import current_app, g, Flask
+from sqlite3 import DatabaseError
 from werkzeug.security import generate_password_hash
 
 
@@ -25,7 +25,6 @@ def close_db(e=None):
 
 def init_db():
     db = get_db()
-
     # open_resource() opens a file relative to the flaskr package, which is useful since you won’t necessarily know where that location is when deploying the application later. get_db returns a database connection, which is used to execute the commands read from the file.
     with current_app.open_resource(resource='schema.sql') as f:
         db.executescript(f.read().decode('utf8'))
@@ -47,32 +46,11 @@ def init_app(app: Flask):
     app.cli.add_command(cmd=seed_db)
 
 
-def get_all_data_from_table(table_name) -> Response:
-    """
-    Fetches all records from a specified table in the database.
-
-    Args:
-        table_name (str): The name of the table to fetch records from.
-
-    Returns:
-        list: A list of dictionaries where each dictionary represents a record in the table.
-        If an error occurs, returns an error message with a 500 status code.
-    """
-    try:
-        db = get_db()
-        query = f"SELECT * FROM {table_name}"
-        rows = db.execute(query).fetchall()
-        return jsonify([dict(row) for row in rows])
-    except DatabaseError as e:
-        return jsonify({'error': e.args[0]}, 500)
-
-
 @click.command(name='seed-db')
 def seed_db():
     """
-    Seeds the database with timeslot records.
+    Seeds the database with mock data. 
     """
-    init_db()  # Initialize the database if it doesn't exist.
     db = get_db()
 
     timeslots_queries = [
