@@ -6,7 +6,7 @@ from api.db import get_db
 ###############################
 
 
-def get_timeslots():
+def get():
     """
     Retrieve a list of all available timeslots.
 

@@ -91,6 +91,3 @@ def create_auth_bp():
         return make_response({"message": "Successfully logged out."}, 200)
 
     return bp
-
-
-auth_bp = create_auth_bp()

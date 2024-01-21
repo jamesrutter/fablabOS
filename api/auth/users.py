@@ -133,6 +133,3 @@ def create_users_bp():
         except DatabaseError as e:
             return {'status': 'error', 'message': e.args[0]}, 500
     return bp
-
-
-users_bp = create_users_bp()
