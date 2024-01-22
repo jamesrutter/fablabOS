@@ -1,4 +1,5 @@
 import os
+from logging.config import dictConfig
 from config import Config
 from flask import Flask
 
@@ -7,8 +8,29 @@ from flask import Flask
 
 
 def create_app(test_config=None):
+
+    # Configure logging
+    dictConfig({
+        'version': 1,
+        'formatters': {'default': {
+            'format': '[%(asctime)s] %(levelname)s in %()s: %(message)s',
+        }},
+        'handlers': {'wsgi': {
+            'class': 'logging.StreamHandler',
+            'stream': 'ext://flask.logging.wsgi_errors_stream',
+            'formatter': 'default'
+        }},
+        'root': {
+            'level': 'DEBUG',
+            'handlers': ['wsgi']
+        }
+    })
+
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
+
+    # Set the default configuration
+
     app.config.from_mapping(
         SECRET_KEY='dev',
         DATABASE=os.path.join(app.instance_path, 'api.sqlite'),

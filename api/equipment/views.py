@@ -1,9 +1,9 @@
-import logging
 from flask import request
-from sqlite3 import Row, Connection, DatabaseError, Cursor
+from sqlite3 import Row, Connection, Cursor
 from api.db import get_db
 from api.auth.decorators import login_required, admin_required
 from . import equipment
+from .controllers import get_equipment_list
 
 ##############################
 ## EQUIPMENT VIEW FUNCTIONS ##
@@ -12,28 +12,11 @@ from . import equipment
 
 @equipment.get('/')
 def index():
-    """
-    Retrieve a list of all equipment items from the database.
-
-    This endpoint fetches all equipment records from the database and returns them 
-    as a list of JSON objects. Each object represents a piece of equipment with all its details.
-
+    """This view (route) function calls the get_equipment_list() controller function to retrieve a list of all equipment in the database.
     Returns:
-        Response: A JSON list of all equipment items. Each item is a dictionary 
-        containing equipment details. If no equipment is found, an empty list is returned.
+        Response: A JSON response containing a list of all equipment in the database.
     """
-    try:
-        db = get_db()
-
-        # Select all equipment from the database, returns as a list of SQlite Row objects.
-        equipment_rows: list[Row] = db.execute(
-            'SELECT * FROM equipment').fetchall()
-
-        # Convert the list of SQlite Row objects to a list of dictionaries, which can be serialized to JSON.
-        return {'status': 'success', 'data': [dict(row) for row in equipment_rows]}, 200
-    except DatabaseError as e:
-        logging.exception(msg='Database error occurred.')
-        return {'status': 'error', 'message': e.args[0]}, 500
+    return get_equipment_list()
 
 
 @equipment.get('/<int:id>')
@@ -115,7 +98,7 @@ def delete(id):
     # If no rows were deleted, the equipment with the specified id does not exist.
     if num_rows_deleted == 0:
         return {'status': 'error', 'message': f'Equipment with id {id} does not exist.'}, 404
-    return {},204 
+    return {}, 204
 
 
 @equipment.put('/<int:id>')

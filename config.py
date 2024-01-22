@@ -8,5 +8,5 @@ class Config:
     MAIL_PASSWORD = os.environ.get('APP_PASSWORD')
     MAIL_SERVER = os.environ.get('SMTP_SERVER')
     MAIL_PORT = os.environ.get('PORT')
-    DATABASE = os.environ.get('DATABASE') or \
-        'sqlite:///' + os.path.join(basedir, '/db/', 'fablabOS.sqlite')
+    # DATABASE = os.environ.get('DATABASE') or \
+    #     'sqlite:///' + os.path.join(basedir, '/data/', 'fablabOS.sqlite')
