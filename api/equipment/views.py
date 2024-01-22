@@ -52,7 +52,7 @@ def detail(id: int):
     equipment: Row = db.execute(
         'SELECT * FROM equipment WHERE id = ?', (id,)).fetchone()
     if equipment is None:
-        return {'status': 'error', 'message': f'Equipment with id {id} does not exist.'}, 404
+        return {'status': 'error', 'message': f'Equipment not found.'}, 404
     # Return the database row as a dictionary to be serialized to JSON.
     return {'status': 'success', 'data': dict(equipment)}, 200
 

@@ -1,29 +1,43 @@
 
-def test_index(client):
+def test_get_equipment_list_success(client):
     """Test listing all equipment."""
     response = client.get('/equipment/')
     assert response.status_code == 200
-    assert isinstance(response.json, dict)
-    assert 'status' in response.json
-    assert response.json['status'] == 'success'
+    json_data = response.json
+
+    assert isinstance(json_data, dict)
+    assert 'status' in json_data
+    assert json_data['status'] == 'success'
+    assert 'data' in json_data
+    # return data should be a list of dictionaries
+    assert isinstance(json_data['data'], list)
+
+    assert len(json_data['data']) > 0
+    assert 'name' in json_data['data'][0]
+    assert 'description' in json_data['data'][0]
 
 
-def test_detail(client):
-    """Test getting a single equipment detail."""
+def test_get_equipment_detail_success(client):
+    """Test getting a single equipment detail successfully."""
     # Assume an equipment with id=1 exists
     response = client.get('/equipment/1')
-    assert response.status_code in [200, 404]
+    assert response.status_code == 200
+    json_data = response.json
 
+    assert isinstance(json_data, dict)
+    assert 'status' in json_data
+    assert json_data['status'] == 'success'
+    assert 'data' in json_data
+    # Return detail data should be a dictionary, not a list
+    assert isinstance(json_data['data'], dict)
 
-# TO DO: Add authentication headers fixture for testing authenticated endpoints
-# def test_create(client, auth_headers):
-#     """Test creating a new equipment item."""
-#     # auth_headers is a fixture that provides authentication headers
-#     response = client.post('/equipment/', headers=auth_headers, data={
-#                            'name': 'New Equipment', 'description': 'Description of new equipment'})
-#     assert response.status_code == 201
-#     assert isinstance(response.json, dict)
-#     assert response.json['status'] == 'success'
+def test_get_equipment_detail_not_found(client):
+    """Test getting a single equipment detail for non-existent equipment."""
+    response = client.get('/equipment/999')
+    assert response.status_code == 404
+    assert response.json['status'] == 'error'
+    assert response.json['message'] == 'Equipment not found.'
+
 
 
 # def test_delete(client, auth_headers):

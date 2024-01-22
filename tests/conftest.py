@@ -15,7 +15,7 @@ def app():
 
     app = create_app({
         'TESTING': True,
-        'DATABASE': db_path, # could also do 'sqlite:///:memory:'
+        'DATABASE': db_path,  # could also do 'sqlite:///:memory:'
     })
 
     with app.app_context():
@@ -37,18 +37,39 @@ def client(app) -> FlaskClient:
 def runner(app):
     return app.test_cli_runner()
 
-# TO DO: Add authentication headers fixture for testing authenticated endpoints
-# @pytest.fixture(scope='module')
-# def auth_headers(client):
-#     """Get authentication headers."""
-#     response = client.post('/auth/login', data={
-#         'username': 'admin',
-#         'password': 'admin'
-#     })
-#     assert response.status_code == 200
-#     assert isinstance(response.json, dict)
-#     assert 'access_token' in response.json
-#     assert 'refresh_token' in response.json
-#     return {
-#         'Authorization': 'Bearer {}'.format(response.json['access_token'])
-#     }
+
+class AuthActions(object):
+    def __init__(self, client):
+        self._client = client
+
+    def register_user(self, username='test_user', password='test', role='user'):
+        return self._client.post(
+            '/auth/register',
+            data={'username': username, 'password': password, 'role': role}
+        )
+    def register_admin(self, username='test_admin', password='test', role='admin'):
+        return self._client.post(
+            '/auth/register',
+            data={'username': username, 'password': password, 'role': role}
+        )
+
+    def login_user(self, username='test_user', password='test'):
+        return self._client.post(
+            '/auth/login',
+            data={'username': username, 'password': password}
+        )
+    
+    def login_admin(self, username='test_admin', password='test'):
+        return self._client.post(
+            '/auth/login',
+            data={'username': username, 'password': password}
+        )
+
+    def logout(self):
+        return self._client.post('/auth/logout')
+
+
+@pytest.fixture
+def auth(client):
+    return AuthActions(client)
+
