@@ -35,7 +35,6 @@ def create_app(test_config=None):
         app.logger.info(msg='API Index Route')
         return {'status': 'success', 'message': 'fablabOS API 0.x.x. Warning! This API is under active and rapid development.'}, 200
 
-
     from api.reservations import reservations as reservations_bp
     app.register_blueprint(blueprint=reservations_bp,
                            url_prefix='/reservations')
@@ -43,9 +42,7 @@ def create_app(test_config=None):
     from api.equipment import equipment as equipment_bp
     app.register_blueprint(equipment_bp, url_prefix='/equipment')
 
-    from api.auth import auth_bp, users_bp
-    app.register_blueprint(blueprint=auth_bp)
-    app.register_blueprint(blueprint=users_bp)
+    from api.auth import auth as auth_bp
+    app.register_blueprint(blueprint=auth_bp, url_prefix='/auth')
 
     return app
-

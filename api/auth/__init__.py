@@ -1,6 +1,5 @@
-from api.auth.auth import create_auth_bp
-from api.auth.users import create_users_bp
+from flask import Blueprint
 
-users_bp = create_users_bp()
+auth = Blueprint('auth', __name__)
 
-auth_bp = create_auth_bp()
+from . import views
