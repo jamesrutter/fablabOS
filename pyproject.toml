@@ -6,3 +6,10 @@ authors = ["James Rutter <jamesdavidrutter@gmail.com>"]
 
 [project.dependencies]
 # Add your dependencies here, like this:
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["api"]

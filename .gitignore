@@ -24,3 +24,5 @@ build/
 # Bash Shell Environment 
 workshop-mailer/env.sh
 *.csv
+
+env.sh

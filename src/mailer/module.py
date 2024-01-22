@@ -7,7 +7,7 @@ from jinja2 import Environment, FileSystemLoader
 
 
 # WARNING: Environment variables are needed to be configured and set for this application to work.
-# Run source ./env.sh to set the environment variables.
+# Run source env.sh to set the environment variables.
 # See the README.md file for more information.
 
 # TODO: Add command line argument parsing to allow for more flexibility.

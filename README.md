@@ -4,6 +4,17 @@
 
 This is an ambitious project to build out a integrated set of systems and services to better improve the user experience at the Haystack Fab Lab. This design could be applied to other contexts, such as community makerspaces, university labs, fab labs, and communal studios. The goal is to utilize a series of open hardware devices, such as the RaspberryPi and Arduino to accomplish as much of the system as possible. This project will be open-source and shared and used as a learning opportunity for students of the Fab Lab.
 
+# Installing 
+## `git clone https://github.com/jamesrutter/fablabOS.git`
+
+## Setting up Environment
+To setup environment variables, you can run the `env.sh` script at the project root. This will export all the necessary environment variables to config Flask and Google API. NOTE: This file is not currently saved to the repo as it contains sensitive information. 
+
+TODO: Add template environment script for generic project setup. 
+
+## Requirements
+`pip install -r requirements.txt` will install all the necessary dependencies for the project. 
+
 
 # Project Structure 
 - `/assets` static files utilized for GUI/front-end. Currently has `/images`, `/scripts`, and `/styles` to organize these areas. Images and other media files could be stored on a remote S3 service for better performance (e.g., Supabase). 
