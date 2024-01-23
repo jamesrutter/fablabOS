@@ -1,13 +1,10 @@
-import logging
 from flask import make_response, current_app, Response
 from sqlite3 import Row, Connection, DatabaseError, Cursor
 from api.db import get_db
 
-####################################
-## EQUIPMENT CONTROLLER FUNCTIONS ##
-####################################
-
-### CRUD OPERATIONS ###
+##############################
+## EQUIPMENT CRUD FUNCTIONS ##
+##############################
 
 
 def get_equipment_list() -> Response:
@@ -135,6 +132,7 @@ def update_equipment(id: int, equipment: dict[str, str]) -> Response:
         current_app.logger.error(
             f'Database error occurred while updating equipment: {e}')
         return make_response({'status': 'error', 'message': e.args[0]}, 500)
+
 
 def delete_equipment(id: int) -> Response:
     """
