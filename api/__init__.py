@@ -1,7 +1,7 @@
 import os
 from logging.config import dictConfig
 from config import Config
-from flask import Flask
+from flask import Flask, render_template
 
 # IMPORT EXTENSTIONS HERE (e.g., SQLAlchemy, Flask-Mail, etc.)
 # Instantiate the extensions here (e.g., db = SQLAlchemy())
@@ -55,7 +55,7 @@ def create_app(test_config=None):
     @app.route(rule='/')
     def index():
         app.logger.info(msg='API Index Route')
-        return {'status': 'success', 'message': 'fablabOS API 0.x.x. Warning! This API is under active and rapid development.'}, 200
+        return render_template('index.html')
 
     from api.reservations import reservations as reservations_bp
     app.register_blueprint(blueprint=reservations_bp,

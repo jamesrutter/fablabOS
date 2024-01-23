@@ -78,7 +78,7 @@ def create_equipment(request) -> Response:
             f'EQUIPMENT >> Invalid form data: {equipment.errors}')
         return make_response({'status': 'error', 'message': 'Invalid form data.'}, 400)
     try:
-        # new_equipment:Equipment = equipment.populate_obj(Equipment)
+        new_equipment:Equipment = Equipment
 
         current_app.logger.info(
             f'EQUIPMENT >> Successfully created equipment with id {new_equipment.id}.')
