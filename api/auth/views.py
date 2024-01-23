@@ -34,7 +34,7 @@ def register():
             (username, generate_password_hash(password=password), role),
         )
         db.commit()
-        current_app.logger.info(
+        current_app.logger.debug(
             f"User {username} successfully registered.")
     except db.IntegrityError:
         current_app.logger.error(
@@ -55,13 +55,13 @@ def login():
 
     if user is None or not check_password_hash(pwhash=user['password'], password=password):
         current_app.logger.error(
-            f"User {username} attempted to log in with an invalid username or password.")
+            f"AUTH >> User {username} attempted to log in with an invalid username or password.")
         return make_response({"error": "Invalid username or password."}, 401)
     session.clear()
     if user:
         session['user_id'] = user['id']
-        current_app.logger.info(
-            f"User: {username} successfully logged in.")
+        current_app.logger.debug(
+            f"AUTH >> User: {username} successfully logged in.")
     return make_response({"message": "Successfully logged in."}, 200)
 
 
@@ -72,14 +72,13 @@ def logout():
             f"User attempted to log out without logging in.")
         return make_response({"error": "You must be logged in to log out."}, 401)
     session.clear()
-    current_app.logger.info(
+    current_app.logger.debug(
         f"User logged out.")
     return make_response({"message": "Successfully logged out."}, 200)
 
 
 @auth.before_app_request
 def load_logged_in_user():
-    current_app.logger.info('NEW REQUEST')
     user_id = session.get('user_id')
     if user_id is None:
         g.user = None
@@ -91,10 +90,10 @@ def load_logged_in_user():
 
 @auth.after_app_request
 def log_session_data(response):
-    current_app.logger.info(
-        f"Active User: {session.get('user_id')}")
-    current_app.logger.info(
-        f"Session Modified?: {session.modified}")
+    current_app.logger.debug(
+        f"AUTH >> Active User: {session.get('user_id')}")
+    current_app.logger.debug(
+        f"AUTH >> Session Modified?: {session.modified}")
     return response
 
 

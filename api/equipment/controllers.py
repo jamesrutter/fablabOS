@@ -1,6 +1,7 @@
-from flask import make_response, current_app, Response
-from sqlite3 import Row, Connection, DatabaseError, Cursor
+from flask import make_response, current_app, Response, Request
+from sqlite3 import Connection, DatabaseError, Cursor
 from api.db import get_db
+from .models import Equipment, EquipmentForm
 
 ##############################
 ## EQUIPMENT CRUD FUNCTIONS ##
@@ -19,18 +20,13 @@ def get_equipment_list() -> Response:
         containing equipment details. If no equipment is found, an empty list is returned.
     """
     try:
-        db: Connection = get_db()
-
-        # Select all equipment from the database, returns as a list of SQlite Row objects.
-        equipment_rows: list[Row] = db.execute(
-            'SELECT * FROM equipment').fetchall()
-
-        # Convert the list of SQlite Row objects to a list of dictionaries, which can be serialized to JSON.
-        current_app.logger.debug(msg='Successfully retrieved equipment list.')
-        return make_response({'status': 'success', 'data': [dict(row) for row in equipment_rows]}, 200)
+        equipment_list = Equipment.all().serialize()
+        current_app.logger.debug(
+            msg='EQUIPMENT >> Successfully retrieved equipment list.')
+        return make_response({'status': 'success', 'data': equipment_list}, 200)
     except DatabaseError as e:
         current_app.logger.error(
-            f'Database error occurred while retrieving equipment list: {e}')
+            f'EQUIPMENT >> Database error occurred while retrieving equipment list: {e}')
         return make_response({'status': 'error', 'message': e.args[0]}, 500)
 
 
@@ -46,23 +42,21 @@ def get_equipment_detail(id: int) -> Response:
         Response: A JSON response containing the equipment with the specified id, otherwise a 404 error.
     """
     try:
-        db: Connection = get_db()
-        equipment: Row = db.execute(
-            'SELECT * FROM equipment WHERE id = ?', (id,)).fetchone()
+        equipment = Equipment.get(id)
         if equipment is None:
             current_app.logger.warning(
-                f'Equipment with id {id} does not exist.')
+                f'EQUIPMENT >> Equipment with id {id} does not exist.')
             return make_response({'status': 'error', 'message': f'Equipment not found.'}, 404)
         current_app.logger.debug(
-            f'Successfully retrieved details for equipment id {id}.')
-        return make_response({'status': 'success', 'data': dict(equipment)}, 200)
+            f'EQUIPMENT >> Successfully retrieved details for equipment id {id}.')
+        return make_response({'status': 'success', 'data': equipment.to_dict()}, 200)
     except DatabaseError as e:
         current_app.logger.error(
-            f'Database error occurred while retrieving equipment details: {e}')
+            f'EQUIPMENT >> Database error occurred while retrieving equipment details: {e}')
         return make_response({'status': 'error', 'message': e.args[0]}, 500)
 
 
-def create_equipment(equipment: dict[str, str]) -> Response:
+def create_equipment(request) -> Response:
     """
     Create a new equipment item in the database.
 
@@ -78,24 +72,24 @@ def create_equipment(equipment: dict[str, str]) -> Response:
         Response: A success message if the equipment is created successfully, 
         or an error message with a 400 status code if required fields are missing.
     """
-    name = equipment['name']
-    description = equipment['description']
-
-    if not name or not description:
-        return make_response({'status': 'error', 'message': 'A name and description are required.'}, 400)
+    equipment = EquipmentForm(data=request.form)
+    if not equipment.validate():
+        current_app.logger.warning(
+            f'EQUIPMENT >> Invalid form data: {equipment.errors}')
+        return make_response({'status': 'error', 'message': 'Invalid form data.'}, 400)
     try:
-        db: Connection = get_db()
-        db.execute(
-            'INSERT INTO equipment (name, description) VALUES (?, ?)', (name, description))
-        db.commit()
+        # new_equipment:Equipment = equipment.populate_obj(Equipment)
+
+        current_app.logger.info(
+            f'EQUIPMENT >> Successfully created equipment with id {new_equipment.id}.')
         return make_response({'status': 'success', 'message': 'Equipment successfully created.'}, 201)
     except DatabaseError as e:
         current_app.logger.error(
-            f'Database error occurred while creating equipment: {e}')
+            f'EQUIPMENT >> Database error occurred while creating equipment: {e}')
         return make_response({'status': 'error', 'message': e.args[0]}, 500)
 
 
-def update_equipment(id: int, equipment: dict[str, str]) -> Response:
+def update_equipment(id: int, request: Request) -> Response:
     """
     Update an existing equipment item in the database by its ID.
 
@@ -112,21 +106,21 @@ def update_equipment(id: int, equipment: dict[str, str]) -> Response:
         Response: A success message if the update is successful, 
         or an error message with a 404 status code if the equipment does not exist.
     """
-    name = equipment['name']
-    description = equipment['description']
 
-    if not name or not description:
-        return make_response({'status': 'error', 'message': 'A name and description are required.'}, 400)
+    equipment_form = EquipmentForm(data=request.form)
+    if not equipment_form.validate():
+        current_app.logger.warning(
+            f'EQUIPMENT >> Invalid form data: {equipment_form.errors}')
+        return make_response({'status': 'error', 'message': 'Invalid form data.'}, 400)
+    equipment_to_update = Equipment.get(id)
+    equipment_form.populate_obj(equipment_to_update)
+    if equipment_to_update is None:
+        current_app.logger.warning(
+            f'EQUIPMENT >> Equipment with id {id} does not exist.')
+        return make_response({'status': 'error', 'message': f'Equipment with id {id} does not exist.'}, 404)
+
     try:
-        db = get_db()
-        cursor: Cursor = db.execute(
-            'UPDATE equipment SET name = ?, description = ? WHERE id = ?', (name, description, id))
-        db.commit()
-        # rowcount returns the number of rows that were modified by the UPDATE statement.
-        num_rows_updated = cursor.rowcount
-        # If no rows were updated, the equipment with the specified id does not exist.
-        if num_rows_updated == 0:
-            return make_response({'status': 'error', 'message': f'Equipment with id {id} does not exist.'}, 404)
+        equipment_to_update.save()
         return make_response({'status': 'success', 'message': f'Equipment {id} successfully updated.'}, 200)
     except DatabaseError as e:
         current_app.logger.error(
@@ -166,17 +160,3 @@ def delete_equipment(id: int) -> Response:
         current_app.logger.error(
             f'Database error occurred while deleting equipment: {e}')
         return make_response({'status': 'error', 'message': e.args[0]}, 500)
-
-
-#################################
-## EQUIPMENT UTILITY FUNCTIONS ##
-#################################
-
-
-def check_if_equipment_exists(id: int):
-    db = get_db()
-    equipment = db.execute(
-        'SELECT * FROM equipment WHERE id = ?', (id,)).fetchone()
-    if equipment is None:
-        return False
-    return True
