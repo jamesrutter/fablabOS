@@ -8,6 +8,19 @@
     {% endblock %}
   </head>
   <body>
+    <header>
+    {% block header %}
+      <h1>Haystack Fab Lab - Resource Management System</h1>
+      <nav>
+        <ul hx-boost="true" hx-target="main" hx-push-url="true">
+          <li><a href="/">Home</a></li>
+          <li><a href="/equipment">Equipment</a></li>
+          <li><a href="/users">Users</a></li>
+          <li><a href="/reservations">Reservations</a></li>
+        </ul>
+    {% endblock %}
+      </nav>
+    </header>
     <div id="content">{% block content %}{% endblock %}</div>
     <div id="footer">
         {% block footer %}

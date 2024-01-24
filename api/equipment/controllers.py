@@ -1,4 +1,4 @@
-from flask import make_response, current_app, Response, Request
+from flask import make_response, current_app, Response, Request, render_template
 from sqlite3 import Connection, DatabaseError, Cursor
 from api.db import get_db
 from .models import Equipment, EquipmentForm
@@ -8,7 +8,24 @@ from .models import Equipment, EquipmentForm
 ##############################
 
 
-def get_equipment_list() -> Response:
+def get_equipment_list() -> list[dict[str, str]]:
+    equipment_list = Equipment.all().serialize() 
+    current_app.logger.debug(
+        'EQUIPMENT >> Successfully retrieved equipment list.')
+    return equipment_list
+
+
+def get_equipment_details(id: int):
+    equipment = Equipment.get(id)
+    if equipment is None:
+        current_app.logger.warning(
+            f'EQUIPMENT >> Equipment with id {id} does not exist.')
+    current_app.logger.debug(
+        f'EQUIPMENT >> Successfully retrieved details for equipment id {id}.')
+    return equipment
+
+
+def get_equipment_list_json() -> Response:
     """
     Retrieve a list of all equipment items from the database.
 
@@ -30,7 +47,7 @@ def get_equipment_list() -> Response:
         return make_response({'status': 'error', 'message': e.args[0]}, 500)
 
 
-def get_equipment_detail(id: int) -> Response:
+def get_equipment_detail_json(id: int) -> Response:
     """This function returns a JSON response containing the equipment with the specified id, otherwise a 404 error.
     Since the sqlite Row object is not JSON serializable, it is converted to a dictionary before being returned.
     Flask takes care of serializing the dictionary to JSON automatically if a serializable object is returned.
@@ -78,7 +95,7 @@ def create_equipment(request) -> Response:
             f'EQUIPMENT >> Invalid form data: {equipment.errors}')
         return make_response({'status': 'error', 'message': 'Invalid form data.'}, 400)
     try:
-        new_equipment:Equipment = Equipment
+        new_equipment: Equipment = Equipment(**equipment.data)
 
         current_app.logger.info(
             f'EQUIPMENT >> Successfully created equipment with id {new_equipment.id}.')

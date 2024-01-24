@@ -1,7 +1,7 @@
-from flask import request
+from flask import request, render_template
 from api.auth.decorators import login_required, admin_required
 from . import equipment
-from .controllers import get_equipment_list, get_equipment_detail, create_equipment, update_equipment, delete_equipment
+from .controllers import get_equipment_list, get_equipment_details, create_equipment, update_equipment, delete_equipment
 
 ##############################
 ## EQUIPMENT VIEW FUNCTIONS ##
@@ -10,12 +10,14 @@ from .controllers import get_equipment_list, get_equipment_detail, create_equipm
 
 @equipment.get('/')
 def index():
-    return get_equipment_list()
+    equipment = get_equipment_list()
+    return render_template('index.html', equipment=equipment)
 
 
 @equipment.get('/<int:id>')
 def detail(id):
-    return get_equipment_detail(id)
+    equipment_details = get_equipment_details(id)
+    return render_template('detail.html', equipment=equipment_details)
 
 
 @equipment.post('/')
