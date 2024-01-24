@@ -2,9 +2,7 @@ import os
 from logging.config import dictConfig
 from config import Config
 from flask import Flask, render_template
-
-# IMPORT EXTENSTIONS HERE (e.g., SQLAlchemy, Flask-Mail, etc.)
-# Instantiate the extensions here (e.g., db = SQLAlchemy())
+from api.database import db_session 
 
 
 def create_app(test_config=None):
@@ -28,14 +26,11 @@ def create_app(test_config=None):
 
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
-
     # Set the default configuration
-
     app.config.from_mapping(
         SECRET_KEY='dev',
-        DATABASE=os.path.join(app.instance_path, 'api.sqlite'),
+        # DATABASE=os.path.join(app.instance_path, 'api.sqlite'),
     )
-
     if test_config is None:
         # load the instance config, if it exists, when not testing
         app.config.from_object(Config)
@@ -49,8 +44,8 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    from . import db
-    db.init_app(app=app)
+    # from . import db
+    # db.init_app(app=app)
 
     @app.route(rule='/')
     def index():
@@ -66,5 +61,9 @@ def create_app(test_config=None):
 
     from api.auth import auth as auth_bp
     app.register_blueprint(blueprint=auth_bp, url_prefix='/auth')
+
+    @app.teardown_appcontext
+    def shutdown_session(exception=None):
+        db_session.remove()
 
     return app

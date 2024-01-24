@@ -1,51 +1,30 @@
-from api.db import get_db
+from typing import Optional
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import Column, Integer, String
+from api.database import Base
 
-class BaseModel:
-    table_name = ''  # Should be overridden in child classes
+# class User(db.Model):
+#     __tablename__ = 'users'
+#     id: Mapped[int] = mapped_column(primary_key=True)
+#     username: Mapped[str] = mapped_column(unique=True)
+#     email: Mapped[str] = mapped_column(unique=True)
+#     role: Mapped[str]
+#     fullname: Mapped[Optional[str]]
+#     password: Mapped[str]
 
-    @classmethod
-    def all(cls) -> list['BaseModel']:
-        db = get_db()
-        rows = db.execute(f'SELECT * FROM {cls.table_name}').fetchall()
-        return [cls.from_row(row) for row in rows]
+#     def __repr__(self):
+#         return '<User %r>' % self.username
 
-    @classmethod
-    def get(cls, id):
-        db = get_db()
-        row = db.execute(f'SELECT * FROM {cls.table_name} WHERE id = ?', (id,)).fetchone()
-        if row:
-            return cls.from_row(row)
-        return None
 
-    def save(self):
-        # Implement the save logic, which inserts or updates the record in the database.
-        pass
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50), unique=True)
+    email = Column(String(120), unique=True)
 
-    def delete(self):
-        # Implement the delete logic, which removes the record from the database.
-        pass
+    def __init__(self, name=None, email=None):
+        self.name = name
+        self.email = email
 
-    @staticmethod
-    def from_row(row):
-        # This method should be implemented in each child class
-        raise NotImplementedError
-
-    def to_dict(self):
-        # Convert the object to a dictionary. This should be implemented in each child class.
-        raise NotImplementedError
-
-class BaseModelCollection:
-    def __init__(self, items: list[BaseModel]):
-        self.items = items
-
-    def to_list(self):
-        return [item.to_dict() for item in self.items]
-
-    def to_dict(self):
-        return {'items': self.to_list()}
-
-    def __len__(self):
-        return len(self.items)
-
-    def __getitem__(self, index):
-        return self.items[index]
+    def __repr__(self):
+        return f'<User {self.name!r}>'

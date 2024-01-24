@@ -26,3 +26,4 @@ workshop-mailer/env.sh
 *.csv
 
 env.sh
+.env
