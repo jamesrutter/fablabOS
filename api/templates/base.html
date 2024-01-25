@@ -1,33 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    {% block head %}
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
     <title>{% block title %}{% endblock %}</title>
-    {% endblock %}
   </head>
   <body>
     <header>
-    {% block header %}
-      <h1>Haystack Fab Lab - Resource Management System</h1>
-      <h2>Home Page</h2>
       <nav>
-        <ul>
-          <li><a href="/">Home</a></li>
-          <li><a href="/equipment">Equipment</a></li>
-          <li><a href="/users">Users</a></li>
-          <li><a href="/reservations">Reservations</a></li>
+        <ul class="flex align-center space-x-2 border-b-2">
+          <li class="hover:bg-sky-500 ml-4"><a href="/">Home</a></li>
+          <li class="hover:bg-sky-500"><a href="/equipment">Equipment</a></li>
+          <li class="hover:bg-sky-500"><a href="/users">Users</a></li>
+          <li class="hover:bg-sky-500"><a href="/reservations">Reservations</a></li>
         </ul>
-    {% endblock %}
       </nav>
+      <h1 class="text-3xl ml-4 mt-4">Haystack Fab Lab - Resource Management System</h1>
     </header>
-    <div id="content">{% block content %}{% endblock %}</div>
-    <div id="footer">
-        {% block footer %}
-        &copy; Copyright 2024 James Rutter</a>.
-        {% endblock %}
-    </div>
-    {# <script src="{{ url_for('static', filename='htmx.min.js') }}"></script> #}
+    <main class="p-8">{% block content %}{% endblock %}</main>
   </body>
 </html>

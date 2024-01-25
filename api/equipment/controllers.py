@@ -1,6 +1,4 @@
-from flask import make_response, current_app, Response, Request, render_template
-from sqlite3 import Connection, DatabaseError, Cursor
-from api.db import get_db
+from flask import current_app
 from sqlalchemy import select
 from api.models import Equipment, Reservation
 from api.database import db_session
