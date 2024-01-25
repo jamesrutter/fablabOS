@@ -3,6 +3,7 @@ from logging.config import dictConfig
 from config import Config
 from flask import Flask, render_template
 from api.database import db_session 
+from api.controllers import get_reservations
 
 
 def create_app(test_config=None):
@@ -49,7 +50,6 @@ def create_app(test_config=None):
 
     @app.route(rule='/')
     def index():
-        app.logger.info(msg='API Index Route')
         return render_template('index.html')
 
     from api.reservations import reservations as reservations_bp

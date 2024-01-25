@@ -1,0 +1,18 @@
+{% extends "base.html" %} {% block title %}Reservations{% endblock %} {% block content %}
+<table>
+  <tr>
+    <th>Reservation ID</th>
+    <th>User</th>
+    <th>Equipment</th>
+    <th>Time Slot</th>
+  </tr>
+  {% for reservation in reservations %}
+  <tr>
+    <td>{{ reservation.id }}</td>
+    <td>{{ reservation.user.username }}</td>
+    <td>{{ reservation.equipment.name }}</td>
+    <td>{{ reservation.timeslot.start_time }} - {{ reservation.timeslot.end_time }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block content %}
 <h1>Equipment Index</h1>
 
 <table>
@@ -15,15 +15,14 @@
     <tr>
       <td>{{ equipment.name }}</td>
       <td>{{ equipment.description }}</td>
-      <td>{{ equipment.quantity }}</td>
       <td>
-        <a href="{{ url_for('equipment_detail', id=equipment.id) }}">View</a>
+        {# <a href="{{ url_for('equipment_detail', id=equipment.id) }}">View</a>
         <a href="{{ url_for('equipment_edit', id=equipment.id) }}">Edit</a>
-        <a href="{{ url_for('equipment_delete', id=equipment.id) }}">Delete</a>
+        <a href="{{ url_for('equipment_delete', id=equipment.id) }}">Delete</a> #}
       </td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
 
-<a href="{{ url_for('equipment_create') }}">Create New Equipment</a>
+{# <a href="{{ url_for('equipment_create') }}">Create New Equipment</a> #} {% endblock %}

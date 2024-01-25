@@ -1,6 +1,30 @@
 {% extends "base.html" %} {% block title %}fablabOS{% endblock %} {% block content %}
 
 <!-- Container for dynamic content -->
-<main></main>
-
-{% endblock %}
+{#
+<main>
+  <h2>Reservation System</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Time Slot</th>
+        {% for equipment in equipment_list %}
+        <th>{{ equipment.name }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for timeslot in timeslot_list %}
+      <tr>
+        <td>{{ timeslot.start_time }} - {{ timeslot.end_time }}</td>
+        {% for equipment in equipment_list %}
+        <td class="{{ 'available' if is_available(timeslot, equipment) else 'unavailable' }}">
+          {% if is_available(timeslot, equipment) %} Available {% else %} Reserved {% endif %}
+        </td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</main>
+#} {% endblock %}

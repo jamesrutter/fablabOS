@@ -11,8 +11,9 @@
     <header>
     {% block header %}
       <h1>Haystack Fab Lab - Resource Management System</h1>
+      <h2>Home Page</h2>
       <nav>
-        <ul hx-boost="true" hx-target="main" hx-push-url="true">
+        <ul>
           <li><a href="/">Home</a></li>
           <li><a href="/equipment">Equipment</a></li>
           <li><a href="/users">Users</a></li>
@@ -27,6 +28,6 @@
         &copy; Copyright 2024 James Rutter</a>.
         {% endblock %}
     </div>
-    <script src="{{ url_for('static', filename='htmx.min.js') }}"></script>
+    {# <script src="{{ url_for('static', filename='htmx.min.js') }}"></script> #}
   </body>
 </html>
