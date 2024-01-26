@@ -4,29 +4,93 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <title>{% block title %}{% endblock %}</title>
   </head>
   <body>
     <header>
-      <nav class="flex items-center justify-between border-b-2 border-black my-4">
-        <ul class="flex align-center space-x-2">
-          <li class="hover:bg-sky-500 ml-4"><a href="/">Home</a></li>
-          <li class="hover:bg-sky-500"><a href="/equipment">Equipment</a></li>
-          <li class="hover:bg-sky-500"><a href="/users">Users</a></li>
-          <li class="hover:bg-sky-500"><a href="/reservations">Reservations</a></li>
+      <nav class="flex items-center justify-between border-b-2 border-gray-800 py-1">
+        <ul class="flex align-center space-x-4 ml-2">
+          <li class="hover:bg-gray-700 hover:text-white px-3 py-1">
+            <a href="{{url_for('index')}}" class="transition duration-300 ease-in-out">Home</a>
+          </li>
+          <li class="hover:bg-gray-700 hover:text-white px-3 py-1">
+            <a href="{{url_for('reservations.index')}}" class="transition duration-300 ease-in-out">Reservations</a>
+          </li>
+          <li class="hover:bg-gray-700 hover:text-white px-3 py-1">
+            <a href="{{url_for('equipment.index')}}" class="transition duration-300 ease-in-out">Equipment</a>
+          </li>
+          <li class="hover:bg-gray-700 hover:text-white px-3 py-1">
+            <a href="{{url_for('auth.index')}}" class="transition duration-300 ease-in-out">Users</a>
+          </li>
         </ul>
-        <div>
-          <form method="post" action="{{ url_for('auth.login') }}" class="flex">
-            <input type="text" id="username" placeholder="username" name="username" required />
-            <input type="password" id="password" placeholder="password" name="password" required />
-            <button type="submit">Login</button>
+
+        <div class="flex items-center">
+          <h1 class="">Haystack Fab Lab | Resource Management System</h1>
+        </div>
+
+        {% if not g.user %}
+        <div class="flex items-center space-x-2 mr-2">
+          <form method="post" action="{{ url_for('auth.login') }}" class="flex space-x-2">
+            <input
+              type="text"
+              id="username"
+              placeholder="username"
+              name="username"
+              required
+              class="px-2 py-1 border text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+            />
+            <input
+              type="password"
+              id="password"
+              placeholder="password"
+              name="password"
+              required
+              class="px-2 py-1 border text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+            />
+            <button
+              type="submit"
+              class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 transition duration-300 ease-in-out"
+            >
+              Login
+            </button>
+          </form>
+          <a
+            href="{{ url_for('auth.register') }}"
+            class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 transition duration-300 ease-in-out"
+            >Register</a
+          >
+        </div>
+        {% else %}
+        <div class="flex items-center space-x-2 mr-2">
+          <span class="text-gray-700 px-3 py-2 text-sm font-medium">{{ g.user.username }}</span>
+          <form method="post" action="{{ url_for('auth.logout') }}">
+            <button
+              type="submit"
+              class="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1 transition duration-300 ease-in-out"
+            >
+              Logout
+            </button>
           </form>
         </div>
-        <div class="mr-4">
-          <a href="{{ url_for('auth.register') }}" class="hover:bg-sky-500">Register</a>
-        </div>
+        {% endif %}
       </nav>
-      <h1 class="text-3xl ml-4 mt-4">Haystack Fab Lab - Resource Management System</h1>
+
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if messages %}
+      <div class="container mx-auto px-4 py-4">
+        {% for category, message in messages %}
+        <div class="mb-4">
+          <div
+            class="{{ 'bg-green-100 border-green-500 text-green-700' if category == 'success' else 'bg-red-100 border-red-500 text-red-700' }} border-l-4 p-4"
+            role="alert"
+          >
+            <p class="font-bold">{{ 'Success' if category == 'success' else 'Error' }}</p>
+            <p>{{ message }}</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %} {% endwith %}
     </header>
     <main class="p-8">{% block content %}{% endblock %}</main>
   </body>

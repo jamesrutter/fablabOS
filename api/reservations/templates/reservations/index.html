@@ -1,18 +1,39 @@
 {% extends "base.html" %} {% block title %}Reservations{% endblock %} {% block content %}
-<table>
-  <tr>
-    <th>Reservation ID</th>
-    <th>User</th>
-    <th>Equipment</th>
-    <th>Time Slot</th>
-  </tr>
-  {% for reservation in reservations %}
-  <tr>
-    <td>{{ reservation.id }}</td>
-    <td>{{ reservation.user.username }}</td>
-    <td>{{ reservation.equipment.name }}</td>
-    <td>{{ reservation.timeslot.start_time }} - {{ reservation.timeslot.end_time }}</td>
-  </tr>
-  {% endfor %}
-</table>
+<div class="container mx-auto px-4 py-4">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Reservations</h1>
+    <!-- Add any action buttons if needed here -->
+  </div>
+
+  <div class="flex flex-wrap -mx-2">
+    {% for reservation in reservations %}
+    <div class="w-full md:w-1/2 lg:w-1/3 px-2 mb-4">
+      <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg font-medium text-gray-900">Reservation ID: {{ reservation.id }}</h3>
+          <div class="mt-2">
+            <div class="text-sm font-medium text-gray-500">User:</div>
+            <div class="text-sm text-gray-700">{{ reservation.user.username }}</div>
+          </div>
+          <div class="mt-2">
+            <div class="text-sm font-medium text-gray-500">Equipment:</div>
+            <div class="text-sm text-gray-700">{{ reservation.equipment.name }}</div>
+          </div>
+          <div class="mt-2">
+            <div class="text-sm font-medium text-gray-500">Time Slot:</div>
+            <div class="text-sm text-gray-700">
+              {{ reservation.timeslot.start_time }} - {{ reservation.timeslot.end_time }}
+            </div>
+          </div>
+          <!-- Add any additional actions or details for each reservation here -->
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="px-4 py-3">
+      <h3 class="text-lg font-medium text-gray-900">No Reservations Found</h3>
+    </div>
+    {% endfor %}
+  </div>
+</div>
 {% endblock %}

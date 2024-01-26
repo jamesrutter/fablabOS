@@ -35,8 +35,8 @@ def seed_db():
 
     # Create Roles
     roles = [
-        Role(name='admin', description='Administrator'),
-        Role(name='user', description='User')
+        Role(id='admin', description='Administrator'),
+        Role(id='user', description='User')
     ]
 
     # Create Equipment

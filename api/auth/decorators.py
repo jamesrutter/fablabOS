@@ -1,7 +1,7 @@
 import functools
 from flask import g, make_response, abort, current_app
 from api.database import db_session
-from api.models import Reservation
+from api.models import Reservation, User, UserRole
 from sqlalchemy import select
 
 
@@ -47,8 +47,13 @@ def admin_required(view):
     """Check if the user making a request is an admin."""
     @functools.wraps(wrapped=view)
     def wrapped_view(**kwargs):
-        # Assuming role is a direct attribute of g.user, and g.user is an instance of User
-        if 'admin' not in [role.name for role in g.user.roles]:
+        if g.user is None:
+            abort(401, description='You must be logged in.')
+
+        stmt = select(UserRole).where(UserRole.user_id == g.user.id)
+        user_roles = db_session.execute(stmt).scalars().all()
+
+        if 'admin' not in [user_role.role.id for user_role in user_roles]:
             current_app.logger.error(f"User {g.user.username} attempted to access admin resource.")
             abort(401, description='You must be an admin to access this resource.')
 

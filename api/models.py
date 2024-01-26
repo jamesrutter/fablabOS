@@ -24,18 +24,20 @@ class User(Base):
 
 class Role(Base):
     __tablename__ = 'roles'
-    id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str]
+    id: Mapped[str] = mapped_column(primary_key=True)
     description: Mapped[str]
     user_roles: Mapped[List[UserRole]] = relationship(
         "UserRole", back_populates="role")
+
+    def __repr__(self):
+        return f"<Role(name={self.name}, description={self.description})>"
 
 
 class UserRole(Base):
     __tablename__ = 'user_roles'
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
-    role_id: Mapped[int] = mapped_column(ForeignKey('roles.id'))
+    role_id: Mapped[str] = mapped_column(ForeignKey('roles.id'))
     user: Mapped["User"] = relationship("User", back_populates="user_roles")
     role: Mapped["Role"] = relationship("Role", back_populates="user_roles")
 

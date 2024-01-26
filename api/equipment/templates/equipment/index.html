@@ -1,0 +1,49 @@
+{% extends 'base.html' %} {% block content %}
+<div class="container mx-auto px-4">
+  <h1 class="text-2xl font-bold text-gray-900 my-4">Equipment Page</h1>
+
+  <div class="flex justify-end mb-2">
+    <a
+      href="{{ url_for('equipment.create') }}"
+      class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+    >
+      Create New Equipment
+    </a>
+  </div>
+
+  <table class="min-w-full leading-normal shadow-md rounded-lg overflow-hidden">
+    <thead>
+      <tr>
+        <th
+          class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+        >
+          Name
+        </th>
+        <th
+          class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+        >
+          Description
+        </th>
+        <th
+          class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+        >
+          Actions
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for e in equipment %}
+      <tr class="hover:bg-gray-100">
+        <td class="px-5 py-2 border-b border-gray-200 bg-white text-sm">{{ e.name }}</td>
+        <td class="px-5 py-2 border-b border-gray-200 bg-white text-sm">{{ e.description }}</td>
+        <td class="px-5 py-2 border-b border-gray-200 bg-white text-sm">
+          <a href="{{ url_for('equipment.detail', id=e.id) }}" class="text-blue-600 hover:text-blue-900">View</a>
+          <a href="{{ url_for('equipment.update', id=e.id) }}" class="text-blue-600 hover:text-blue-900 ml-3">Edit</a>
+          <a href="{{ url_for('equipment.delete', id=e.id) }}" class="text-red-600 hover:text-red-900 ml-3">Delete</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

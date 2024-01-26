@@ -6,7 +6,8 @@ from sqlalchemy.orm import joinedload
 from api.models import Reservation
 
 def get_reservations() -> Sequence[Reservation]:
-    stmt = select(Reservation).options(joinedload(Reservation.timeslot), joinedload(Reservation.equipment), joinedload(Reservation.user))
+    # stmt = select(Reservation).options(joinedload(Reservation.timeslot), joinedload(Reservation.equipment), joinedload(Reservation.user))
+    stmt = select(Reservation)
     current_app.logger.debug(
         f'SQL >> {str(stmt)}')
     reservations: Sequence[Reservation] = db_session.execute(stmt).scalars().all()

@@ -1,5 +1,45 @@
 {% extends 'base.html' %} {% block content %}
-<h1>User Detail</h1>
-<p>Username: {{ user.username }}</p>
-<!-- Other user details -->
+<div class="container mx-auto px-4 py-4">
+  <h1 class="text-2xl font-bold text-gray-900 mb-4">User Profile</h1>
+
+  <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6">
+      <h3 class="text-lg leading-6 font-medium text-gray-900">{{ u.user.username }}</h3>
+      <p class="mt-1 max-w-2xl text-sm text-gray-500">User Details</p>
+    </div>
+    <div class="border-t border-gray-200">
+      <dl>
+        <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">Username</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ u.user.username }}</dd>
+        </div>
+        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">Email</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ u.user.email }}</dd>
+        </div>
+        <!-- Add more user details as needed -->
+        <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">Role</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{ u.role.id }}</dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+
+  <!-- Optional: Actions like Edit or Delete -->
+  <div class="mt-5">
+    <a
+      href="{{ url_for('auth.update', id=u.id) }}"
+      class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+    >
+      Edit Profile
+    </a>
+    <a
+      href="{{ url_for('auth.delete', id=u.id) }}"
+      class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded ml-2"
+    >
+      Delete User
+    </a>
+  </div>
+</div>
 {% endblock %}
