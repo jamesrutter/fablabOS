@@ -8,13 +8,23 @@
   </head>
   <body>
     <header>
-      <nav>
-        <ul class="flex align-center space-x-2 border-b-2">
+      <nav class="flex items-center justify-between border-b-2 border-black my-4">
+        <ul class="flex align-center space-x-2">
           <li class="hover:bg-sky-500 ml-4"><a href="/">Home</a></li>
           <li class="hover:bg-sky-500"><a href="/equipment">Equipment</a></li>
           <li class="hover:bg-sky-500"><a href="/users">Users</a></li>
           <li class="hover:bg-sky-500"><a href="/reservations">Reservations</a></li>
         </ul>
+        <div>
+          <form method="post" action="{{ url_for('auth.login') }}" class="flex">
+            <input type="text" id="username" placeholder="username" name="username" required />
+            <input type="password" id="password" placeholder="password" name="password" required />
+            <button type="submit">Login</button>
+          </form>
+        </div>
+        <div class="mr-4">
+          <a href="{{ url_for('auth.register') }}" class="hover:bg-sky-500">Register</a>
+        </div>
       </nav>
       <h1 class="text-3xl ml-4 mt-4">Haystack Fab Lab - Resource Management System</h1>
     </header>

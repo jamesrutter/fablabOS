@@ -1,0 +1,26 @@
+{% extends 'base.html' %} {% block content %}
+<h2 class="text-3xl mb-2">Register</h2>
+<form method="post" action="{{ url_for('auth.register') }}" class="flex flex-col w-1/2 space-y-4">
+  <input
+    class="border-2 px-2 border-black py-2 w-1/4"
+    type="text"
+    id="username"
+    placeholder="username"
+    name="username"
+    required
+  />
+  <input
+    class="border-2 px-2 border-black py-2 w-1/4"
+    type="password"
+    id="password"
+    placeholder="password"
+    name="password"
+    required
+  />
+  <select id="role" name="role" required class="py-2 border-2 px-4 border-black w-1/4">
+    <option value="admin">Admin</option>
+    <option value="user">User</option>
+  </select>
+  <button type="submit" class="border-2 border-black py-2 w-1/4 hover:bg-gray-100">Register</button>
+</form>
+{% endblock %}

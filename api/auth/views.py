@@ -2,7 +2,7 @@ from flask import render_template, request, redirect, url_for, flash, session, g
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import select, update, delete
 from api.database import db_session
-from api.models import User
+from api.models import User, UserRole 
 from api.auth import auth
 from api.auth.decorators import login_required
 
@@ -35,10 +35,12 @@ def register():
         new_user = User(username=username, password=hashed_password, role=role)
         db_session.add(new_user)
         db_session.commit()
+        db_session.add(UserRole(user_id=new_user.id, role_id=role))
+        db_session.commit()
         flash("Successfully registered.", 'success')
         return redirect(url_for('auth.login'))
 
-    return render_template('register.html')
+    return render_template('auth/register.html')
 
 
 @auth.route('/login', methods=['GET', 'POST'])
