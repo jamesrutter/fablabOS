@@ -24,19 +24,33 @@ def init_db():
 def seed_db():
     # Create Users
     from api.models import User, Role, UserRole, Equipment, TimeSlots, Reservation
+
+    # Create Roles
+    roles = [
+        Role(id='admin', description='Administrator'),
+        Role(id='user', description='User'),
+        Role(id='guest', description='Guest'),
+        Role(id='student', description='Student'),
+        Role(id='faculty', description='Faculty'),
+        Role(id='staff', description='Staff'),
+        Role(id='alumni', description='Alumni'),
+        Role(id='community', description='Community'),
+        Role(id='tech', description='Technician')
+    ]
+
     users = [
         User(username='jamesrutter', email='jamesdavidrutter@gmail.com',
              fullname='James Rutter', password=generate_password_hash('password123')),
         User(username='john_doe', email='john@example.com',
              fullname='John Doe', password=generate_password_hash('password123')),
         User(username='jane_doe', email='jane@example.com',
-             fullname='Jane Doe', password=generate_password_hash('password123'))
-    ]
-
-    # Create Roles
-    roles = [
-        Role(id='admin', description='Administrator'),
-        Role(id='user', description='User')
+             fullname='Jane Doe', password=generate_password_hash('password123')),
+        User(username='alice_smith', email='alice@example.com',
+             fullname='Alice Smith', password=generate_password_hash('password123')),
+        User(username='bob_jones', email='bob@example.com',
+             fullname='Bob Jones', password=generate_password_hash('password123')),
+        User(username='emma_wilson', email='emma@example.com',
+             fullname='Emma Wilson', password=generate_password_hash('password123')),
     ]
 
     # Create Equipment
@@ -82,9 +96,17 @@ def seed_db():
     for user in users:
         user_role = UserRole(user_id=user.id, role_id=random.choice(roles).id)
         db_session.add(user_role)
+        # reservation = Reservation(user_id=user.id, equipment_id=random.choice(
+        #     equipment_list).id, time_slot_id=random.choice(time_slots).id)
+        # db_session.add(reservation)
 
-        reservation = Reservation(user_id=user.id, equipment_id=random.choice(
-            equipment_list).id, time_slot_id=random.choice(time_slots).id)
+    # Create Reservations
+    for _ in range(25):  # 50 reservations
+        reservation = Reservation(
+            user_id=random.choice(users).id,
+            equipment_id=random.choice(equipment_list).id,
+            time_slot_id=random.choice(time_slots).id
+        )
         db_session.add(reservation)
 
     db_session.commit()

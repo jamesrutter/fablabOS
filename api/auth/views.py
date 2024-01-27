@@ -2,18 +2,19 @@ from flask import render_template, redirect, url_for, flash, session, g, request
 from werkzeug.security import check_password_hash
 from sqlalchemy import select
 from api.database import db_session
-from api.models import User, UserRole
+from api.models import User
 from api.auth import auth
 from api.auth.decorators import login_required, admin_required
 from api.auth.controllers import get_users, get_user, delete_user, create_user, update_user
-
+from api.schemas import RegistrationForm, LoginForm
 
 # AUTHENTICATION #
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
-    if request.method == 'POST':
-        user, error = create_user(request)
+    form = RegistrationForm(request.form)
+    if request.method == 'POST' and form.validate():
+        user, error = create_user(form)
         if error:
             flash(error, 'error')
             return render_template('auth/register.html')
@@ -26,18 +27,23 @@ def register():
 
 @auth.post('/login')
 def login():
-    username = request.form['username']
-    password = request.form['password']
+    form = LoginForm(request.form)
+    if request.method == 'POST' and form.validate():
+        print(form.username.data)
+        print(form.password.data)
+        username = form.username.data
+        password = form.password.data
+        stmt = select(User).where(User.username == username)
+        user = db_session.execute(stmt).scalar()
 
-    stmt = select(User).where(User.username == username)
-    user = db_session.execute(stmt).scalar()
-
-    if user and check_password_hash(user.password, password):
-        session.clear()
-        session['user_id'] = user.id
-        flash(message='Successfully logged in.', category='success')
-    else:
-        flash(message='Invalid username or password.', category='warning')
+        if user and password and check_password_hash(user.password, password):
+            session.clear()
+            session['user_id'] = user.id
+            flash(message='Successfully logged in.', category='success')
+        else:
+            flash(message='Invalid username or password.', category='warning')
+        return redirect(url_for('index'))
+    flash(message='Invalid username or password.', category='warning')
     return redirect(url_for('index'))
 
 
@@ -72,9 +78,10 @@ def index():
 
 @auth.route('/users/create', methods=['GET', 'POST'])
 @login_required
-def create():
-    if request.method == 'POST':
-        user, error = create_user(request)
+def create(form: RegistrationForm):
+    form = RegistrationForm(request.form)
+    if request.method == 'POST' and form.validate():
+        user, error = create_user(form)
         if error:
             flash(error, 'error')
             return render_template('users/create.html')
@@ -107,6 +114,11 @@ def delete(id: int):
     delete_user(id)
     flash('User deleted successfully!')
     return redirect(url_for('auth.index'), 303)
+
+
+@auth.get('/fragment/register')
+def load_registration_form():
+    return render_template('partials/register.html')
 
 
 # # ERROR HANDLERS #

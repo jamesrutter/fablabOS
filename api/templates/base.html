@@ -11,16 +11,24 @@
     <header>
       <nav class="flex items-center justify-between border-b-2 border-gray-800 py-1">
         <ul class="flex align-center space-x-4 ml-2">
-          <li class="hover:bg-gray-700 hover:text-white px-3 py-1">
+          <li
+            class="{{'bg-gray-700 text-white' if request.path == url_for('index') else 'hover:bg-gray-700 hover:text-white'}} px-3 py-1"
+          >
             <a href="{{url_for('index')}}" class="transition duration-300 ease-in-out">Home</a>
           </li>
-          <li class="hover:bg-gray-700 hover:text-white px-3 py-1">
+          <li
+            class="{{'bg-gray-700 text-white' if request.path == url_for('reservations.index') else 'hover:bg-gray-700 hover:text-white'}} px-3 py-1"
+          >
             <a href="{{url_for('reservations.index')}}" class="transition duration-300 ease-in-out">Reservations</a>
           </li>
-          <li class="hover:bg-gray-700 hover:text-white px-3 py-1">
+          <li
+            class="{{'bg-gray-700 text-white' if request.path == url_for('equipment.index') else 'hover:bg-gray-700 hover:text-white'}} px-3 py-1"
+          >
             <a href="{{url_for('equipment.index')}}" class="transition duration-300 ease-in-out">Equipment</a>
           </li>
-          <li class="hover:bg-gray-700 hover:text-white px-3 py-1">
+          <li
+            class="{{'bg-gray-700 text-white' if request.path == url_for('auth.index') else 'hover:bg-gray-700 hover:text-white'}} px-3 py-1"
+          >
             <a href="{{url_for('auth.index')}}" class="transition duration-300 ease-in-out">Users</a>
           </li>
         </ul>
@@ -60,6 +68,9 @@
             class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 transition duration-300 ease-in-out"
             >Register</a
           >
+          <!-- <button hx-get="{{url_for('auth.load_registration_form')}}" hx-target="main" hx-swap="beforeend">
+            Register
+          </button> -->
         </div>
         {% else %}
         <div class="flex items-center space-x-2 mr-2">
@@ -92,6 +103,7 @@
       </div>
       {% endif %} {% endwith %}
     </header>
-    <main class="p-8">{% block content %}{% endblock %}</main>
+
+    <main class="p-8 flex">{% block content %}{% endblock %}</main>
   </body>
 </html>

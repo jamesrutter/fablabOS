@@ -1,17 +1,17 @@
-from flask import current_app, Request
-from sqlalchemy.orm import joinedload
-from sqlalchemy import select, ScalarResult
-from sqlalchemy.exc import SQLAlchemyError
+from flask import current_app
+from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from sqlalchemy import select
 from api.models import User
 from api.database import db_session
 from typing import Sequence
 from api.models import User, UserRole, Role
 from werkzeug.security import generate_password_hash
-
+from api.schemas import RegistrationForm
 
 #############################
 ## USER CRUD FUNCTIONS ##
 #############################
+
 
 def get_users() -> Sequence[UserRole]:
     """Fetch all complete user records from the database.
@@ -46,38 +46,42 @@ def get_user(id: int) -> UserRole | None:
         return None
 
 
-def create_user(request: Request) -> tuple[UserRole | None, str | None]:
+def create_user(form: RegistrationForm) -> tuple[User | None, str | None]:
     error = None
     # Extract data from request
-    username = request.form.get('username')
-    password = request.form.get('password')
-    email = request.form.get('email')
-    role = request.form.get('role', 'user')
+    username = form.username.data
+    password = form.password.data
+    email = form.email.data
 
-    # Check if user already exists
-    stmt = select(User).where(User.username == username)
-    if db_session.execute(stmt).one_or_none():
-        error = "User already registered. Please specify a different username."
+    # Check if username or email already exists
+    user_stmt = select(User).where(User.username == username)
+    email_stmt = select(User).where(User.email == email)
+
+    existing_user = db_session.execute(user_stmt).scalar()
+    existing_email = db_session.execute(email_stmt).scalar()
+
+    if existing_user:
+        error = "Username already taken. Please choose a different username."
         return None, error
-
-    # Check that username and password are not empty
-    if not password or not username:
-        error = "A username and password are required!"
+    elif existing_email:
+        error = "Email already registered. Please login or use a different email."
         return None, error
+    
+    if password: 
+        # Hash password
+        hashed_password = generate_password_hash(password)
 
-    # Hash password
-    hashed_password = generate_password_hash(password)
-
-    # Create user and add to database session
-    user = User(username=username, password=hashed_password, email=email)
-    role = db_session.execute(select(Role).where(Role.id == role)).scalar_one()
-    u = UserRole(user=user, role=role)
-    db_session.add(u)
-
-    # Commit changes to database
-    db_session.commit()
-
-    return u, None
+        # Create user and add to database session
+        user = User(username=username, password=hashed_password, email=email)
+        role = db_session.execute(select(Role).where(Role.id == 'user')).scalar()
+        u = UserRole(user=user, role=role)
+        db_session.add(u)
+        # Commit changes to database
+        db_session.commit()
+        return u, None
+    else:
+        error = "Password cannot be empty."
+        return None, error
 
 
 def update_user(id: int, request) -> tuple[User | None, str | None]:

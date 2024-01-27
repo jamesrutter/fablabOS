@@ -1,18 +1,11 @@
-from marshmallow import Schema, fields
+from wtforms import Form, StringField, PasswordField, validators
 
+class LoginForm(Form):
+    username = StringField('Username', [validators.Length(min=4, max=25)])
+    password = PasswordField('Password', [validators.DataRequired()])
 
-class UserSchema(Schema):
-    username = fields.Str(required=True)
-    password = fields.Str(required=True)
-    role = fields.Str(required=True)
-
-
-class EquipmentSchema(Schema):
-    name = fields.Str(required=True)
-    description = fields.Str(required=True)
-
-
-class ReservationSchema(Schema):
-    user_id = fields.Int(required=True)
-    equipment_id = fields.Int(required=True)
-    time_slot_id = fields.Int(required=True)
+class RegistrationForm(Form):
+    username = StringField('Username', [validators.Length(min=4, max=25)])
+    email = StringField('Email Address', [validators.Length(min=6, max=35)])
+    password = PasswordField('New Password', [validators.DataRequired()])
+    
