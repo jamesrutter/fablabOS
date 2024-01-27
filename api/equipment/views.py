@@ -21,6 +21,7 @@ def detail(id):
 
 
 @equipment.route('/create', methods=['GET', 'POST'])
+@admin_required
 @login_required
 def create():
     if request.method == 'POST':
@@ -33,6 +34,7 @@ def create():
 
 
 @equipment.put('/<int:id>')
+@admin_required
 @login_required
 def update(id: int):
     e = update_equipment(id=id, request=request)
@@ -43,6 +45,7 @@ def update(id: int):
 
 
 @equipment.delete('/<int:id>')
+@admin_required
 @login_required
 def delete(id: int):
     delete_equipment(id)

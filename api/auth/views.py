@@ -35,9 +35,9 @@ def login():
     if user and check_password_hash(user.password, password):
         session.clear()
         session['user_id'] = user.id
-        flash(message='Successfully logged in.',category='success')
+        flash(message='Successfully logged in.', category='success')
     else:
-        flash(message='Invalid username or password.',category='warning')
+        flash(message='Invalid username or password.', category='warning')
     return redirect(url_for('index'))
 
 
@@ -55,8 +55,8 @@ def load_logged_in_user():
     if user_id is None:
         g.user = None
     else:
-        # TODO: Need to join UserRole to get role information and pass it along. 
-        stmt = select(UserRole).where(User.id == user_id)
+        # TODO: Need to join UserRole to get role information and pass it along.
+        stmt = select(User).where(User.id == user_id)
         g.user = db_session.execute(stmt).scalar()
 
 
@@ -68,13 +68,6 @@ def load_logged_in_user():
 def index():
     users = get_users()
     return render_template('users/index.html', users=users)
-
-
-# @auth.get('/users/<int:id>')
-# @login_required
-# def detail(id):
-#     u = get_user(id)
-#     return render_template('users/detail.html', u=u)
 
 
 @auth.route('/users/create', methods=['GET', 'POST'])
