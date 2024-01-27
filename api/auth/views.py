@@ -2,10 +2,10 @@ from flask import render_template, redirect, url_for, flash, session, g, request
 from werkzeug.security import check_password_hash
 from sqlalchemy import select
 from api.database import db_session
-from api.models import User
+from api.models import User, UserRole
 from api.auth import auth
 from api.auth.decorators import login_required, admin_required
-from api.auth.controllers import get_users, get_user, delete_user, create_user
+from api.auth.controllers import get_users, get_user, delete_user, create_user, update_user
 
 
 # AUTHENTICATION #
@@ -55,7 +55,8 @@ def load_logged_in_user():
     if user_id is None:
         g.user = None
     else:
-        stmt = select(User).where(User.id == user_id)
+        # TODO: Need to join UserRole to get role information and pass it along. 
+        stmt = select(UserRole).where(User.id == user_id)
         g.user = db_session.execute(stmt).scalar()
 
 
@@ -63,16 +64,17 @@ def load_logged_in_user():
 
 @auth.get('/users')
 @login_required
+@admin_required
 def index():
     users = get_users()
     return render_template('users/index.html', users=users)
 
 
-@auth.get('/users/<int:id>')
-@login_required
-def detail(id):
-    u = get_user(id)
-    return render_template('users/detail.html', u=u)
+# @auth.get('/users/<int:id>')
+# @login_required
+# def detail(id):
+#     u = get_user(id)
+#     return render_template('users/detail.html', u=u)
 
 
 @auth.route('/users/create', methods=['GET', 'POST'])
@@ -92,17 +94,18 @@ def create():
 
 @auth.route('/users/<int:id>', methods=['GET', 'PUT'])
 @login_required
-def update(id: int, ):
+def update(id: int):
     if request.method == 'PUT':
-        user, error = create_user(request)
+        user, error = update_user(id, request)
         if error:
             flash(error, 'error')
             return render_template('users/create.html')
 
         flash("User created successfully.", 'success')
-        return redirect(url_for('user_management.index'))
+        return redirect(url_for('auth.index'), 303)
 
-    return render_template('users/create.html')
+    u = get_user(id)
+    return render_template('users/update.html', u=u)
 
 
 @auth.delete('/users/<int:id>')
@@ -110,7 +113,7 @@ def update(id: int, ):
 def delete(id: int):
     delete_user(id)
     flash('User deleted successfully!')
-    return redirect(url_for('auth.index'))
+    return redirect(url_for('auth.index'), 303)
 
 
 # # ERROR HANDLERS #

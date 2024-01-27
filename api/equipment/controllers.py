@@ -17,7 +17,6 @@ def get_equipment_list() -> Sequence[Equipment]:
         stmt).scalars().all()
     current_app.logger.debug(
         'EQUIPMENT >> Successfully retrieved equipment list.')
-    print(equipment_list)
     return equipment_list
 
 

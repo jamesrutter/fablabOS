@@ -4,10 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="{{ url_for('static', filename='js/htmx.min.js') }}"></script>
     <title>{% block title %}{% endblock %}</title>
   </head>
-  <body>
+  <body hx-boost="true">
     <header>
       <nav class="flex items-center justify-between border-b-2 border-gray-800 py-1">
         <ul class="flex align-center space-x-4 ml-2">

@@ -119,7 +119,7 @@ def update_user(id: int, request) -> tuple[User | None, str | None]:
 def delete_user(id: int):
     try:
         # Fetch the user to be deleted
-        stmt = select(UserRole).where(UserRole.id == id)
+        stmt = select(User).where(User.id == id)
         u = db_session.execute(stmt).scalar()
 
         if u is None:
