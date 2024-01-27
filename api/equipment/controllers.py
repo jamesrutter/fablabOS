@@ -12,24 +12,19 @@ from typing import Sequence
 
 
 def get_equipment_list() -> Sequence[Equipment]:
-    stmt = select(Equipment, Reservation).join(Reservation)
+    stmt = select(Equipment)
     equipment_list: Sequence[Equipment] = db_session.execute(
         stmt).scalars().all()
-    current_app.logger.debug(
-        'EQUIPMENT >> Successfully retrieved equipment list.')
     return equipment_list
 
 
 def get_equipment_details(id: int):
-    stmt = select(Equipment).where(Equipment.id == id).options(
-        joinedload(Equipment.reservations))
+    stmt = select(Equipment).where(Equipment.id == id)
     equipment = db_session.execute(stmt).scalar()
     if equipment is None:
         current_app.logger.warning(
             f'EQUIPMENT >> Equipment with id {id} does not exist.')
         return None
-    current_app.logger.debug(
-        f'EQUIPMENT >> Successfully retrieved details for equipment id {id}.')
     return equipment
 
 

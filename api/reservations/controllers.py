@@ -1,237 +1,81 @@
 from typing import Sequence
-from flask import current_app
-from api.database import db_session
+from datetime import datetime
+from flask import g, Request, current_app
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload
+from api.database import db_session
 from api.models import Reservation
+from api.reservations.validators import validate_reservation
 
 
 def get_reservations() -> Sequence[Reservation]:
-    stmt = select(Reservation).options(joinedload(Reservation.timeslot), joinedload(
-        Reservation.equipment), joinedload(Reservation.user))
+    stmt = select(Reservation)
     reservations: Sequence[Reservation] = db_session.execute(
         stmt).scalars().all()
     return reservations
 
 
-
-# @reservations.get(rule='/')
-# def index():
-#     """
-#     Retrieve a list of all reservations from the database.
-
-#     This endpoint fetches all reservation records from the database and returns them
-#     as a list of JSON objects. Each object represents a reservation with all its details.
-
-#     Returns:
-#         Response: A JSON list of all reservations. Each reservation is a dictionary
-#         containing reservation details. If no reservations are found, an empty list is returned.
-#     """
-#     try:
-#         db = get_db()
-
-#         # Select all reservations and their details from the database, returns as a list of SQlite Row objects.
-#         query = """
-#         SELECT
-#             reservation.id AS reservation_id,
-#             user.username,
-#             user.role,
-#             equipment.name AS equipment_name,
-#             equipment.description AS equipment_description,
-#             time_slot.start_time,
-#             time_slot.end_time
-#         FROM
-#             reservation
-#         JOIN
-#             user ON reservation.user_id = user.id
-#         JOIN
-#             equipment ON reservation.equipment_id = equipment.id
-#         JOIN
-#             time_slot ON reservation.time_slot_id = time_slot.id;
-#         """
-
-#         reservation_rows: list[Row] = db.execute(query).fetchall()
-
-#         # Convert the list of SQlite Row objects to a list of dictionaries, which can be serialized to JSON.
-#         return {'status': 'success', 'data': [dict(row) for row in reservation_rows]}, 200
-#     except DatabaseError as e:
-#         return {'status': 'error', 'message': e.args[0]}, 500
+def get_reservation(id: int) -> Reservation:
+    stmt = select(Reservation).where(Reservation.id == id)
+    reservation: Reservation = db_session.execute(stmt).scalar_one()
+    return reservation
 
 
-# @reservations.post(rule='/')
-# @login_required
-# def create():
-#     """
-#     Make a reservation for a piece of equipment.
-
-#     This endpoint creates a new reservation record in the database.
-#     The reservation is created for a specific user, equipment and timeslot.
-
-#     Args:
-#         user_id (int): The ID of the user making the reservation.
-#         equipment_id (int): The ID of the equipment being reserved.
-#         time_slot_id (int): The ID of the timeslot being reserved.
-
-#     Returns:
-#         Response: A JSON object representing the reservation that was created.
-#         If the reservation could not be created, an error message with a 500 status code is returned.
-#     """
-#     try:
-#         user_id = request.form['user_id']
-#         equipment_id = request.form['equipment_id']
-#         time_slot_id = request.form['time_slot_id']
-#     except BadRequestKeyError as e:
-#         return {'status': 'fail', 'hint': f'{e.description} Check the following parameter: {e.args[0]}'}, 400
-
-#     (is_valid, message) = validate_reservation(
-#         user_id=user_id, equipment_id=equipment_id, time_slot_id=time_slot_id)
-#     if not is_valid:
-#         return {'status': 'error', 'message': message}, 400
-#     db = get_db()
-#     try:
-#         # Insert the reservation into the database.
-#         query = """INSERT INTO reservation (user_id, equipment_id, time_slot_id) VALUES (?, ?, ?)"""
-#         db.execute(query, (user_id, equipment_id, time_slot_id))
-#         db.commit()
-
-#         # Select the reservation from the database, returns as a SQlite Row object.
-#         query = """SELECT * FROM reservation WHERE user_id = ? AND equipment_id = ? AND time_slot_id = ?"""
-#         reservation_row: Cursor = db.execute(
-#             query, (user_id, equipment_id, time_slot_id)).fetchone()
-
-#         # Convert the SQlite Row object to a dictionary, which can be serialized to JSON.
-#         reservation_data = dict(reservation_row)
-#         # Example usage
-#         confirmation_email(
-#             user_email="jamesdavidrutter@gmail.com",
-#             user_name="James",
-#             reservation_details="Date: April 5, 2024\nTime: 10:00 AM - 12:00 PM\nEquipment: 3D Printer"
-#         )
-#         return {'status': 'Success', 'data': reservation_data}, 201
-#     except DatabaseError as e:
-#         db.rollback
-#         return {'status': e.args[0]}, 500
+def delete_reservation(id: int):
+    stmt = select(Reservation).where(Reservation.id == id)
+    reservation: Reservation = db_session.execute(stmt).scalar_one()
+    db_session.delete(reservation)
+    db_session.commit()
 
 
-# @reservations.get(rule='/<int:id>')
-# def detail(id):
-#     """
-#     Retrieve a reservation from the database.
+def create_reservation(request: Request) -> tuple[Reservation | None, str | None]:
+    time_slot_id = int(request.form['timeslot'])
+    equipment_id = int(request.form['equipment'])
+    user_id = g.user.id
 
-#     This endpoint fetches a reservation record from the database and returns it
-#     as a JSON object. The object represents a reservation with all its details.
+    # Validate the reservation
+    valid, e = validate_reservation(user_id, equipment_id, time_slot_id)
+    if not valid:
+        return None, e
 
-#     Args:
-#         id (int): The ID of the reservation to retrieve.
+    # Create the reservation
+    reservation = Reservation(
+        user_id=user_id,
+        equipment_id=equipment_id,
+        time_slot_id=time_slot_id,
+    )
 
-#     Returns:
-#         Response: A JSON object representing the reservation that was retrieved.
-#         If the reservation could not be retrieved, an error message with a 500 status code is returned.
-#     """
-#     db = get_db()
-#     try:
-#         # Select the reservation from the database, returns as a SQlite Row object.
-#         query = """
-#         SELECT
-#             reservation.id AS reservation_id,
-#             user.username,
-#             user.role,
-#             equipment.name AS equipment_name,
-#             equipment.description AS equipment_description,
-#             time_slot.start_time,
-#             time_slot.end_time
-#         FROM
-#             reservation
-#         JOIN
-#             user ON reservation.user_id = user.id
-#         JOIN
-#             equipment ON reservation.equipment_id = equipment.id
-#         JOIN
-#             time_slot ON reservation.time_slot_id = time_slot.id
-#         WHERE
-#             reservation.id = ?;
-#         """
-#         reservation: Row = db.execute(query, (id,)).fetchone()
+    db_session.add(reservation)
+    db_session.commit()
 
-#         if reservation is None:
-#             return {'status': 'error', 'message': 'Reservation not found.'}, 404
-
-#         # Convert the SQlite Row object to a dictionary, which can be serialized to JSON.
-#         data = dict(reservation)
-#         return {'status': 'success', 'data': data}, 200
-#     except DatabaseError as e:
-#         return {'status': 'error', 'message': e.args[0]}, 500
-#     finally:
-#         db.close()
+    # Send confirmation email
+    # confirmation_email(reservation)
+    return reservation, None
 
 
-# @reservations.put(rule='/<int:id>')
-# @login_required
-# @owner_required
-# def update(id):
-#     """
-#     Update a reservation in the database.
+def update_reservation(id: int, request) -> tuple[Reservation | None, str | None]:
+    equipment_id = int(request.form['equipment'])
+    time_slot_id = int(request.form['timeslot'])
+    user_id = g.user.id
 
-#     This endpoint updates a reservation record in the database.
+    # Validate the reservation
+    valid, msg = validate_reservation(user_id, equipment_id, time_slot_id, reservation_id=id)
+    if not valid:
+        current_app.logger.debug(msg)
+        return None, msg
 
-#     Args:
-#         id (int): The ID of the reservation to update.
+    try:
+        # Select the exisiting reservation
+        stmt = select(Reservation).where(Reservation.id == id)
+        reservation: Reservation = db_session.execute(stmt).scalar_one()
 
-#     Returns:
-#         Response: A JSON object representing the reservation that was updated.
-#         If the reservation could not be updated, an error message with a 500 status code is returned.
-#     """
-#     db = get_db()
-#     try:
-#         # Update the reservation in the database.
-#         query = """UPDATE reservation SET user_id = ?, equipment_id = ?, time_slot_id = ? WHERE id = ?"""
-#         db.execute(query, (request.form['user_id'], request.form['equipment_id'],
-#                            request.form['time_slot_id'], id))
-#         db.commit()
+        # Update the reservation
+        reservation.equipment_id = equipment_id
+        reservation.time_slot_id = time_slot_id
 
-#         # Select the reservation from the database, returns as a SQlite Row object.
-#         query = """SELECT * FROM reservation WHERE id = ?"""
-#         reservation: Row = db.execute(query, (id,)).fetchone()
-
-#         # Convert the SQlite Row object to a dictionary, which can be serialized to JSON.
-#         data = dict(reservation)
-#         return {'status': 'success', 'data': data}, 200
-#     except DatabaseError as e:
-#         db.rollback()
-#         return {'status': 'error', 'message': e.args[0]}, 500
-#     finally:
-#         db.close()
-
-
-# @reservations.delete(rule='/<int:id>')
-# @login_required
-# @owner_required
-# def delete(id):
-#     """
-#     Delete a reservation from the database.
-
-#     This endpoint deletes a reservation record from the database.
-
-#     Args:
-#         id (int): The ID of the reservation to delete.
-
-#     Returns:
-#         Response: A success message if the reservation is deleted successfully,
-#         or an error message with a 500 status code if the reservation could not be deleted.
-#     """
-#     db = get_db()
-#     try:
-#         # Delete the reservation from the database.
-#         query = """DELETE FROM reservation WHERE id = ?"""
-#         db.execute(query, (id,))
-#         db.commit()
-#         return {'status': 'success', 'data': None}, 200
-#     except DatabaseError as e:
-#         db.rollback()
-#         return {'status': 'error', 'message': e.args[0]}, 500
-#     finally:
-#         db.close()
-
-
-# # Now register the sub-module routes with the blueprint
-# reservations.get('/timeslots')(get)
+        db_session.commit()
+        return reservation, None
+    except Exception:
+        msg = "Error updating reservation"
+        current_app.logger.debug(msg)
+        db_session.rollback()
+        return None, msg

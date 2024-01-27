@@ -2,38 +2,56 @@
 <div class="container mx-auto px-4 py-4">
   <div class="flex justify-between items-center mb-6">
     <h1 class="text-2xl font-bold text-gray-900">Reservations</h1>
-    <!-- Add any action buttons if needed here -->
+    <!-- Add Reservation Button -->
+    <div class="flex justify-end mb-2">
+      <a href="{{ url_for('reservations.create') }}" class="border-2 border-gray-800 py-2 px-4 hover:bg-gray-200">
+        Create Reservation
+      </a>
+    </div>
   </div>
 
-  <div class="flex flex-wrap -mx-2">
-    {% for reservation in reservations %}
-    <div class="w-full md:w-1/2 lg:w-1/3 px-2 mb-4">
-      <div class="bg-white rounded-lg shadow overflow-hidden">
-        <div class="px-4 py-5 sm:p-6">
-          <h3 class="text-lg font-medium text-gray-900">Reservation ID: {{ reservation.id }}</h3>
-          <div class="mt-2">
-            <div class="text-sm font-medium text-gray-500">User:</div>
-            <div class="text-sm text-gray-700">{{ reservation.user.username }}</div>
-          </div>
-          <div class="mt-2">
-            <div class="text-sm font-medium text-gray-500">Equipment:</div>
-            <div class="text-sm text-gray-700">{{ reservation.equipment.name }}</div>
-          </div>
-          <div class="mt-2">
-            <div class="text-sm font-medium text-gray-500">Time Slot:</div>
-            <div class="text-sm text-gray-700">
-              {{ reservation.timeslot.start_time }} - {{ reservation.timeslot.end_time }}
-            </div>
-          </div>
-          <!-- Add any additional actions or details for each reservation here -->
+  <!-- Reservation Cards -->
+  <div class="flex flex-wrap -mx-2 space-x-2">
+    {% for r in reservations %}
+    <!-- Reservation Card -->
+    <div id="reservation-{{ r.id }}" class="w-full md:w-1/3 lg:w-1/4 px-2 mb-4 border-2 border-gray-800">
+      <div class="px-4 py-5 sm:p-6">
+        <h2 class="text-xl font-bold">{{ r.timeslot.start_time.strftime('%Y-%m-%d') }}</h2>
+        <h3 class="text-lg font-medium text-gray-900">
+          {{ r.timeslot.start_time.strftime('%H:%M') }} - {{ r.timeslot.end_time.strftime('%H:%M') }}
+        </h3>
+        <h3 class="text-lg font-medium text-gray-900">{{ r.equipment.name }}</h3>
+        <h3 class="text-lg font-medium text-gray-900">{{ r.user.fullname }}</h3>
+        <div class="flex justify-between mt-4">
+          <button
+            hx-get="{{ url_for('reservations.update', id=r.id) }}"
+            hx-target="#reservation-{{ r.id }}"
+            hx-swap="outerHTML"
+            class="border-2 border-gray-800 py-2 px-2 hover:bg-gray-200"
+          >
+            Edit
+          </button>
+          <button
+            hx-confirm="Are you sure you want to delete this reservation?"
+            hx-delete="{{ url_for('reservations.delete', id=r.id) }}"
+            hx-target="this.closest('.w-full')"
+            class="border-2 border-gray-800 py-2 px-2 hover:bg-gray-200"
+          >
+            Delete
+          </button>
         </div>
       </div>
     </div>
     {% else %}
+    <!-- No Reservations Found -->
     <div class="px-4 py-3">
       <h3 class="text-lg font-medium text-gray-900">No Reservations Found</h3>
     </div>
     {% endfor %}
   </div>
 </div>
+
+<!-- Modals for Add/Edit Reservation -->
+<!-- ... Modals here ... -->
+
 {% endblock %}

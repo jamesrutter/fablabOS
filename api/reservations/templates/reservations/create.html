@@ -1,0 +1,27 @@
+{% extends "base.html" %} {% block title %}Reservations{% endblock %} {% block content %}
+
+<form method="post" action="{{ url_for('reservations.create') }}" class="flex flex-col space-y-6 w-1/4 mb-6">
+  <select name="equipment" id="equipment" required class="py-4 px-2 border-2 border-gray-800 hover:bg-gray-200">
+    {% for e in equipment %}
+    <option value="{{ e.id }}">{{ e.name }}</option>
+    {% endfor %}
+  </select>
+
+  <select name="timeslot" id="timeslot" required class="py-4 px-2 border-2 border-gray-800 hover:bg-gray-200">
+    {% for t in timeslots %}
+    <option value="{{ t.id }}">
+      {{ t.start_time.strftime('%Y-%m-%d %H:%M') }} - {{ t.end_time.strftime('%H:%M') }}
+    </option>
+    {% endfor %}
+  </select>
+
+  <button type="submit" class="border-2 border-gray-800 py-2 px-2 hover:bg-gray-200">Create Reservation</button>
+</form>
+
+<a
+  href="{{url_for('reservations.index')}}"
+  class="mt-6 border-2 border-gray-800 py-2 px-2 hover:bg-gray-600 bg-gray-800 text-white"
+  >Back</a
+>
+
+{% endblock %}
