@@ -1,57 +1,50 @@
-{% extends "base.html" %} {% block title %}Reservations{% endblock %} {% block content %}
+{% extends "base.html" %} {% block title %}Reservation System{% endblock %} {% block content %}
 <div class="container mx-auto px-4 py-4">
+  <!-- Toolbar -->
   <div class="flex justify-between items-center mb-6">
     <h1 class="text-2xl font-bold text-gray-900">Reservations</h1>
-    <!-- Add Reservation Button -->
-    <div class="flex justify-end mb-2">
-      <a href="{{ url_for('reservations.create') }}" class="border-2 border-gray-800 py-2 px-4 hover:bg-gray-200">
-        Create Reservation
-      </a>
+    <div class="flex space-x-4">
+      <input
+        type="search"
+        id="search"
+        placeholder="Search reservations..."
+        name="q"
+        value="{{ request.args.get('q') or '' }}"
+        hx-get="{{url_for('reservations.index')}}"
+        hx-trigger="search, keyup delay:300ms changed"
+        hx-target="tbody"
+        hx-push-url="true"
+        hx-indicator="#spinner"
+        class="border px-2 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+      />
+      <img id="spinner" class="htmx-indicator" src="/static/img/circle.svg" alt="Request In Flight..." />
+      <a
+        href="{{ url_for('reservations.create') }}"
+        class="bg-blue-500 hover:bg-blue-700 text-white px-3 py-1 transition duration-300 ease-in-out"
+        >Create Reservation</a
+      >
+      <span hx-get="{{url_for('reservations.count')}}" hx-trigger="load">
+        <img id="spinner" class="htmx-indicator" src="/static/img/circle.svg" />
+      </span>
     </div>
   </div>
 
-  <!-- Reservation Cards -->
-  <div class="flex flex-wrap -mx-2 space-x-2">
-    {% for r in reservations %}
-    <!-- Reservation Card -->
-    <div id="reservation-{{ r.id }}" class="w-full md:w-1/3 lg:w-1/4 px-2 mb-4 border-2 border-gray-800">
-      <div class="px-4 py-5 sm:p-6">
-        <h2 class="text-xl font-bold">{{ r.timeslot.start_time.strftime('%Y-%m-%d') }}</h2>
-        <h3 class="text-lg font-medium text-gray-900">
-          {{ r.timeslot.start_time.strftime('%H:%M') }} - {{ r.timeslot.end_time.strftime('%H:%M') }}
-        </h3>
-        <h3 class="text-lg font-medium text-gray-900">{{ r.equipment.name }}</h3>
-        <h3 class="text-lg font-medium text-gray-900">{{ r.user.fullname }}</h3>
-        <div class="flex justify-between mt-4">
-          <button
-            hx-get="{{ url_for('reservations.update', id=r.id) }}"
-            hx-target="#reservation-{{ r.id }}"
-            hx-swap="outerHTML"
-            class="border-2 border-gray-800 py-2 px-2 hover:bg-gray-200"
-          >
-            Edit
-          </button>
-          <button
-            hx-confirm="Are you sure you want to delete this reservation?"
-            hx-delete="{{ url_for('reservations.delete', id=r.id) }}"
-            hx-target="this.closest('.w-full')"
-            class="border-2 border-gray-800 py-2 px-2 hover:bg-gray-200"
-          >
-            Delete
-          </button>
-        </div>
-      </div>
-    </div>
-    {% else %}
-    <!-- No Reservations Found -->
-    <div class="px-4 py-3">
-      <h3 class="text-lg font-medium text-gray-900">No Reservations Found</h3>
-    </div>
-    {% endfor %}
+  <!-- Table -->
+  <div class="overflow-x-auto">
+    <table class="min-w-full bg-white">
+      <thead class="border-b">
+        <tr>
+          <th scope="col" class="text-sm font-medium text-gray-900 px-6 py-4 text-left">Date</th>
+          <th scope="col" class="text-sm font-medium text-gray-900 px-6 py-4 text-left">Time Slot</th>
+          <th scope="col" class="text-sm font-medium text-gray-900 px-6 py-4 text-left">Equipment</th>
+          <th scope="col" class="text-sm font-medium text-gray-900 px-6 py-4 text-left">User</th>
+          <th scope="col" class="text-sm font-medium text-gray-900 px-6 py-4 text-left">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% include 'reservations/rows.html' %}
+      </tbody>
+    </table>
   </div>
 </div>
-
-<!-- Modals for Add/Edit Reservation -->
-<!-- ... Modals here ... -->
-
 {% endblock %}

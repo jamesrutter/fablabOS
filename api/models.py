@@ -2,9 +2,9 @@ from __future__ import annotations
 from typing import Optional
 from typing import List
 from datetime import datetime
-from sqlalchemy import ForeignKey, DateTime
+from sqlalchemy import ForeignKey, DateTime, func, select
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from api.database import Base
+from api.database import Base, db_session
 
 
 class User(Base):
@@ -77,3 +77,10 @@ class Reservation(Base):
     def __repr__(self):
         return f"<Reservation(id={self.id}, user_id={self.user_id}, " \
             f"equipment_id={self.equipment_id}, time_slot_id={self.time_slot_id})>"
+    
+    @classmethod
+    def count(cls) -> int | None:
+        """Count the total number of reservations."""
+        count_query = select(func.count())
+        total_reservations = db_session.execute(count_query).scalar()
+        return total_reservations

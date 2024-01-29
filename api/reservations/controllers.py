@@ -3,12 +3,17 @@ from datetime import datetime
 from flask import g, Request, current_app
 from sqlalchemy import select
 from api.database import db_session
-from api.models import Reservation
+from api.models import Reservation, User
 from api.reservations.validators import validate_reservation
 
 
-def get_reservations() -> Sequence[Reservation]:
+def get_reservations(search: str | None = None) -> Sequence[Reservation]:
     stmt = select(Reservation)
+
+    if search is not None:
+        stmt = stmt.join(User)
+        stmt = stmt.where(User.username.ilike(f'%{search}%'))
+
     reservations: Sequence[Reservation] = db_session.execute(
         stmt).scalars().all()
     return reservations

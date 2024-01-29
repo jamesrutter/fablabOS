@@ -5,6 +5,8 @@ from api.auth.decorators import login_required
 from api.equipment.controllers import get_equipment_list
 from api.timeslots.controllers import get_timeslots
 
+import time 
+
 ###############################
 # RESERVATION VIEW FUNCTIONS ##
 ###############################
@@ -12,9 +14,24 @@ from api.timeslots.controllers import get_timeslots
 
 @reservations.get('/')
 def index():
-    r = get_reservations()
-    return render_template('reservations/index.html', reservations=r)
+    search = request.args.get('q')
+    page = request.args.get('page', 1, type=int)
+    if search is not None: 
+        r = get_reservations(search=search)
+        count = len(r)
+        if request.headers.get('HX-Trigger') == 'search':
+            time.sleep(2)
+            return render_template('reservations/rows.html', reservations=r, count=count)
+    else:
+        r = get_reservations()
+        count = len(r)
+    return render_template('reservations/index.html', reservations=r, page=page, count=count)
 
+@reservations.get('/count')
+def count():
+    time.sleep(2)
+    count = len(get_reservations())
+    return "(" + str(count) + " total Reservations)"
 
 @reservations.route('/create', methods=['GET', 'POST'])
 @login_required

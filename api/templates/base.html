@@ -68,9 +68,6 @@
             class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 transition duration-300 ease-in-out"
             >Register</a
           >
-          <!-- <button hx-get="{{url_for('auth.load_registration_form')}}" hx-target="main" hx-swap="beforeend">
-            Register
-          </button> -->
         </div>
         {% else %}
         <div class="flex items-center space-x-2 mr-2">
@@ -104,6 +101,6 @@
       {% endif %} {% endwith %}
     </header>
 
-    <main class="p-8 flex">{% block content %}{% endblock %}</main>
+    <main class="p-8">{% block content %}{% endblock %}</main>
   </body>
 </html>
