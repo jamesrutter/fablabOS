@@ -1,30 +1,55 @@
 {% extends 'base.html' %} {% block content %}
 <h2 class="text-3xl mb-2">Register</h2>
-<form method="post" action="{{ url_for('auth.register') }}" class="flex flex-col w-1/2 space-y-4">
-  <input
-    class="border-2 px-2 border-black py-2 w-1/4"
-    type="text"
-    id="username"
-    placeholder="username"
-    name="username"
-    required
-  />
-  <input
-    class="border-2 px-2 border-black py-2 w-1/4"
-    type="email"
-    id="email"
-    placeholder="email"
-    name="email"
-    required
-  />
-  <input
-    class="border-2 px-2 border-black py-2 w-1/4"
-    type="password"
-    id="password"
-    placeholder="password"
-    name="password"
-    required
-  />
-  <button type="submit" class="border-2 border-black py-2 w-1/4 hover:bg-gray-100">Register</button>
+<form
+  action="{{ url_for('auth.register') }}"
+  method="post"
+  hx-boost="true"
+  class="flex flex-col space-y-4 w-1/2 space-y-4"
+>
+  {{ form.csrf_token }}
+  <div class="flex">
+    <input
+      class="border-2 px-2 border-black w-1/2 py-2"
+      type="text"
+      id="username"
+      placeholder="username"
+      name="username"
+      value="{{ form.username.data if form.username.data != None }}"
+      required
+    />
+    {% if form.username.errors %} {% for error in form.username.errors %}
+    <div class="ml-2 text-red text-sm border-red w-1/2 py-2">{{ error }}</div>
+    {% endfor %} {% endif %}
+  </div>
+  <div>
+    <input
+      class="border-2 px-2 border-black w-1/2 py-2"
+      type="email"
+      hx-get="{{ url_for('auth.validate_email') }}"
+      hx-target="next .error"
+      hx-trigger="change, keyup delay:400ms changed"
+      id="email"
+      placeholder="email"
+      name="email"
+      value="{{ form.email.data if form.email.data != None }}"
+      required
+    />
+    <span class="error ml-2 text-red text-sm border-red w-1/2 py-2"></span>
+  </div>
+  <div>
+    <input
+      class="border-2 px-2 border-black py-2 w-1/2"
+      type="password"
+      id="password"
+      placeholder="password"
+      name="password"
+      value="{{ form.password.data if form.password.data != None }}"
+      required
+    />
+    {% if form.password.errors %}
+    <span>{{ form.password.errors }}</span>
+    {% endif %}
+  </div>
+  <button type="submit" class="border-2 border-black py-2 w-1/2 hover:bg-gray-100">Register</button>
 </form>
 {% endblock %}

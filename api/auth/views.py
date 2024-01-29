@@ -7,22 +7,25 @@ from api.auth import auth
 from api.auth.decorators import login_required, admin_required
 from api.auth.controllers import get_users, get_user, delete_user, create_user, update_user
 from api.schemas import RegistrationForm, LoginForm
+from wtforms.validators import Email, ValidationError
+
 
 # AUTHENTICATION #
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm(request.form)
-    if request.method == 'POST' and form.validate():
+    if request.method == 'POST':
+        if not form.validate():
+            return render_template('auth/register.html', form=form)
         user, error = create_user(form)
         if error:
             flash(error, 'error')
-            return render_template('auth/register.html')
-
+            return render_template('auth/register.html', form=form)
         flash("Successfully registered! Please log in.", 'success')
         return redirect(url_for('index'))
 
-    return render_template('auth/register.html')
+    return render_template('auth/register.html', form=form)
 
 
 @auth.post('/login')
@@ -116,10 +119,17 @@ def delete(id: int):
     return redirect(url_for('auth.index'), 303)
 
 
-@auth.get('/fragment/register')
-def load_registration_form():
-    return render_template('partials/register.html')
-
+@auth.get('/users/email)')
+def validate_email():
+    email = request.args.get('email')
+    form = RegistrationForm(email=email)
+    form.email.data = email  # Set the data that you want to validate
+    print(form.email.data)
+    if form.email.validate(form):  # Pass the form as the first argument
+        print("valid email!")
+        return ""
+    else:
+        return form.email.errors.__str__()
 
 # # ERROR HANDLERS #
 
