@@ -5,6 +5,8 @@ from flask import Flask, render_template
 from api.database import db_session
 from api.controllers import get_reservations
 
+# TODO: Rename this package to "schedulr" and update all references to it.
+
 
 def create_app(test_config=None):
 

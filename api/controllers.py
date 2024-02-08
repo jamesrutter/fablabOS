@@ -11,6 +11,5 @@ def get_reservations() -> Sequence[Reservation]:
     current_app.logger.debug(
         f'SQL >> {str(stmt)}')
     reservations: Sequence[Reservation] = db_session.execute(stmt).scalars().all()
-    current_app.logger.debug(
-        'RESERVATION >> Successfully retrieved reservation list.')
+    current_app.logger.debug('RESERVATION >> Successfully retrieved reservation list.')
     return reservations 

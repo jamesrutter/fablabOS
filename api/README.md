@@ -1,12 +1,6 @@
 # Schedulr 
 A resource management and booking utility. 
 
-# TO DOs
-- Input sanitization and/or serialization 
-- Add logging 
-- API documentation 
-
-# Additional Features
 
 ## Advanced Booking Rules:
 Implement more complex booking rules, such as limiting the number of reservations a user can have at a time restricting booking duration, or setting up recurring reservations.

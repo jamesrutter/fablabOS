@@ -9,6 +9,8 @@ from api.auth.controllers import get_users, get_user, delete_user, create_user, 
 from api.schemas import RegistrationForm, LoginForm
 from wtforms.validators import Email, ValidationError
 
+# TODO: Simplify the registration process by automatically generating a username based on either 1) email address or 2) first and last name.
+# TODO: Add a "forgot password" feature.
 
 # AUTHENTICATION #
 

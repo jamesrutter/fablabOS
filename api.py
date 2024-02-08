@@ -2,6 +2,7 @@ from api import create_app, db_session
 import os
 import click
 
+
 app = create_app(os.getenv('FLASK_CONFIG') or None)
 
 
